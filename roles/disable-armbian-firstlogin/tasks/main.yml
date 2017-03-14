@@ -1,0 +1,13 @@
+---
+
+- name: disable armbian 1st login activities
+  file:
+    path: /root/.not_logged_in_yet
+    state: absent
+
+- name: reset root password
+  shell: echo 'root:xxxx' | chpasswd
+
+- name: disable root password change requirement
+  shell: chage -d -1 root
+

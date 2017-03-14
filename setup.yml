@@ -1,0 +1,6 @@
+- name: router setup
+  hosts: all
+
+  roles:
+    - disable-armbian-firstlogin
+
