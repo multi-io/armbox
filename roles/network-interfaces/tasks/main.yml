@@ -1,0 +1,18 @@
+---
+
+- name: uninstall unneeded networking packages
+  package:
+    name: "{{item}}"
+    state: absent
+  with_items:
+    - network-manager
+    - isc-dhcp-client
+    - wpasupplicant
+
+- name: install required networking packages
+  package:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - swconfig
+

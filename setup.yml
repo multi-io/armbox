@@ -3,4 +3,5 @@
 
   roles:
     - disable-armbian-firstlogin
+    - network-interfaces
 
