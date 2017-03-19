@@ -6,14 +6,17 @@
 # Default-Stop:      0 6
 ### END INIT INFO
 
-# my alternative init.d/networking script that does not
-# use ifup(8)/ifdown(8), doing all the ifconfig stuff manually
-# instead, but still runs Debian's /etc/network/if-*.d/ scripts.
-
-# Introduced primarily to set up an ethernet bridge using brctl,
-# but see bridge-utils-interfaces(8) for how to do that in
-# Debian's /etc/network/interfaces file as well.
-
+## Monolithic networking service script. Meant to be used
+## as the ExecStart script of the systemd networking.service.
+##
+## Monolithic in the sense that the ifup-/-down commands,
+## /etc/network/interfaces configuration file
+## and corresponding ifup@ services to start up individual interfaces
+## are not supported. The whole network is started and stopped
+## in this script. Reason: Didn't want to bother to map
+## all the switch configuration to /etc/network/interfaces properly.
+##
+## See bridge-utils-interfaces(8) for how to do the latter instead.
 
 PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
 
@@ -75,34 +78,6 @@ process_options() {
     log_warning_msg "/etc/network/options is deprecated."
     doopt spoofprotect yes
     doopt syncookies no
-    doopt ip_forward no
-}
-
-ifupdown() {
-    if="$1"
-     shift
-    cmd="$1"     # up | down
-    shift
-    export IFACE=$if
-    if [ "$cmd" = up ]; then
-	export MODE=start
-	export PHASE=pre-up
-	run-parts /etc/network/if-pre-up.d
-
-	ifconfig $if "$@" $cmd
-
-	export PHASE=post-up
-	run-parts /etc/network/if-up.d
-    else
-        export MODE=stop
-	export PHASE=pre-down
-	run-parts /etc/network/if-down.d
-
-	ifconfig $if $cmd
-
-	export PHASE=post-down
-	run-parts /etc/network/if-post-down.d
-    fi
 }
 
 case "$1" in
@@ -110,22 +85,56 @@ start)
 	process_options
 	log_action_begin_msg "Configuring network interfaces"
 
-	ifupdown lo up 127.0.0.1
+    ip_forward
 
-	modprobe ath5k
-	ifconfig eth0 0.0.0.0
-	ifconfig wlan0 0.0.0.0
+    ## physical switch configuration. Relies on DSA-capable driver for the switch,
+    ## which means switch configuration works via the standard br* tools
+
+    # physical switch eth0, consisting of 5 physical ports lan1...lan4, wan
+    # despite the "lan" vs. "wan" naming, they're all equivalent after bootup and
+    # operate as a switche initially (until the kernel boots and disables this).
+    # we'll use "wan" for the outgoing (WAN) port and lan1..4 for the LAN-facing ports
+    brctl addbr physical_switch
+    brctl addif physical_switch lan1
+    brctl addif physical_switch lan2
+    brctl addif physical_switch lan3
+    brctl addif physical_switch lan4
+    brctl addif physical_switch wan
+
+    # 1 is the default vid (VLAN ID), all interfaces belong to it initially
+    # (see "bridge vlan show" after a clean reboot and brctl addbr+addif sequence).
+    # Hence only vid 2 must be added to an interface explicitly. vid 1 must be REMOVED explicitly.
+    # So we use vid 1 for the VLAN of all the local ports (i.e. all but the "wan" port),
+    # and vid 2 for the VLAN of the wan port.
+    ip link add link eth0 name eth0.1 type vlan id 1
+    ip link add link eth0 name eth0.2 type vlan id 2
+    bridge vlan add vid 2 dev wan pvid untagged
+    bridge vlan del vid 1 dev wan
+
+    ip link set wan up
+    ip link set lan1 up
+    ip link set lan2 up
+    ip link set lan3 up
+    ip link set lan4 up
+
+    ip link set eth0.2 up
+    ip link set eth0.1 up
+
+    ## setup software switch for the local LAN
+
 	brctl addbr lanif
-	brctl addif lanif eth0
-# with newer kernels, adding wlan ifaces in STA mode isn't supported anymore.
-#  hostapd is told about the bridge device and will add the wlan iface to it
-#	brctl addif lanif wlan0
+	brctl addif lanif eth0.1
+    # with newer kernels, adding wlan ifaces in STA mode isn't supported anymore.
+    #  hostapd is told about the bridge device and will add the wlan iface to it
+    # brctl addif lanif wlan0
 
-	ifupdown lanif up 192.168.142.1 netmask 255.255.255.0
+    # LAN IP
+    ip addr add 192.168.142.1/24 dev lanif
+    ip link set lanif up
 	#ip -6 link set lanif mtu 1400  # for better IPv6 compatibility...  # distributed via radvd.conf to LAN hosts
 	echo 1400 >/proc/sys/net/ipv6/conf/lanif/mtu  # for IPv6 only (does this really work?)
 
-        log_action_end_msg $?
+    log_action_end_msg $?
 
 	;;
 
@@ -133,28 +142,29 @@ stop)
 	if sed -n 's/^[^ ]* \([^ ]*\) \([^ ]*\) .*$/\2/p' /proc/mounts | 
 		grep -qE '^(nfs[1234]?|smbfs|ncp|ncpfs|coda|cifs)$'; then
 	    log_warning_msg "not deconfiguring network interfaces: network shares still mounted."
-	    exit 0
+	    exit 1
 	fi
 
 	log_action_begin_msg "Deconfiguring network interfaces"
-	brctl delif lanif eth0
-	brctl delif lanif eth1
+	ip addr flush dev lanif
+	brctl delif lanif eth0.1
 #	brctl delif lanif wlan0
-	ifupdown lanif down
 	brctl delbr lanif
-	ifupdown lo down
-	;;
 
-force-reload|restart)
-	process_options
-	log_action_begin_msg "Reconfiguring network interfaces"
-	./networking stop
-	./networking start
-	log_action_end_msg $?
+    ip link delete link dev eth0.1
+    ip link delete link dev eth0.2
+    brctl delbr physical_switch
+    ip link set wan down
+    ip link set lan1 down
+    ip link set lan2 down
+    ip link set lan3 down
+    ip link set lan4 down
+
+	#ifupdown lo down
 	;;
 
 *)
-	echo "Usage: /etc/init.d/networking {start|stop|restart|force-reload}"
+	echo "Usage: /etc/init.d/networking {start|stop}. But preferably, use this script via systemd (service 'network')"
 	exit 1
 	;;
 esac
