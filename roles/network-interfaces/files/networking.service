@@ -1,0 +1,15 @@
+[Unit]
+Description=LSB: Raise network interfaces.
+Wants=network.target
+Before=network.target sysinit.target shutdown.target
+After=network-pre.target systemd-sysctl.service systemd-modules-load.service mountkernfs.service local-fs.target urandom.service
+DefaultDependencies=no
+Conflicts=shutdown.target
+
+[Service]
+Type=oneshot
+IgnoreSIGPIPE=no
+RemainAfterExit=yes
+ExecStart=/etc/init.d/networking start
+ExecStop=/etc/init.d/networking stop
+ExecReload=/etc/init.d/networking reload

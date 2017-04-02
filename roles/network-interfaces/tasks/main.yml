@@ -15,3 +15,16 @@
     src: files/networking
     dest: /etc/init.d/networking
     mode: 0755
+
+- name: upload networking service unit
+  copy:
+    src: files/networking.service
+    dest: /etc/systemd/system/networking.service
+    mode: 0644
+
+- name: enable and start networking service
+  systemd:
+    name: networking.service
+    state: started
+    enabled: True
+    daemon_reload: True
