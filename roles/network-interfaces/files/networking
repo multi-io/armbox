@@ -28,7 +28,7 @@ spoofprotect_rp_filter() {
     [ -e /proc/sys/net/ipv4/conf/all/rp_filter ] || return 1
     RC=0
     for f in /proc/sys/net/ipv4/conf/*/rp_filter; do
-	echo 1 > $f || RC=1
+    echo 1 > $f || RC=1
     done
     return $RC
 }
@@ -36,9 +36,9 @@ spoofprotect_rp_filter() {
 spoofprotect() {
     log_action_begin_msg "Setting up IP spoofing protection"
     if spoofprotect_rp_filter; then
-	log_action_end_msg 0 "rp_filter"
+    log_action_end_msg 0 "rp_filter"
     else
-	log_action_end_msg 1
+    log_action_end_msg 1
     fi
 }
 
@@ -47,7 +47,7 @@ ip_forward() {
     if echo 1 > /proc/sys/net/ipv4/ip_forward; then
         log_action_end_msg 0
     else
-	log_action_end_msg 1
+    log_action_end_msg 1
     fi
 }
 
@@ -56,7 +56,7 @@ syncookies() {
     if echo 1 > /proc/sys/net/ipv4/tcp_syncookies; then
         log_action_end_msg 0
     else
-	log_action_end_msg 1
+    log_action_end_msg 1
     fi
 }
 
@@ -65,11 +65,11 @@ doopt() {
     default=$2
     opt=`grep "^$optname=" /etc/network/options || true`
     if [ -z "$opt" ]; then
-	opt="$optname=$default"
+    opt="$optname=$default"
     fi
     optval=${opt#$optname=}
     if [ "$optval" = "yes" ]; then
-	eval $optname
+    eval $optname
     fi
 }
 
@@ -82,8 +82,8 @@ process_options() {
 
 case "$1" in
 start)
-	process_options
-	log_action_begin_msg "Configuring network interfaces"
+    process_options
+    log_action_begin_msg "Configuring network interfaces"
 
     ip_forward
 
@@ -122,8 +122,8 @@ start)
 
     ## setup software switch for the local LAN
 
-	brctl addbr lanif
-	brctl addif lanif eth0.1
+    brctl addbr lanif
+    brctl addif lanif eth0.1
     # with newer kernels, adding wlan ifaces in STA mode isn't supported anymore.
     #  hostapd is told about the bridge device and will add the wlan iface to it
     # brctl addif lanif wlan0
@@ -131,25 +131,25 @@ start)
     # LAN IP
     ip addr add 192.168.142.1/24 dev lanif
     ip link set lanif up
-	#ip -6 link set lanif mtu 1400  # for better IPv6 compatibility...  # distributed via radvd.conf to LAN hosts
-	echo 1400 >/proc/sys/net/ipv6/conf/lanif/mtu  # for IPv6 only (does this really work?)
+    #ip -6 link set lanif mtu 1400  # for better IPv6 compatibility...  # distributed via radvd.conf to LAN hosts
+    echo 1400 >/proc/sys/net/ipv6/conf/lanif/mtu  # for IPv6 only (does this really work?)
 
     log_action_end_msg $?
 
-	;;
+    ;;
 
 stop)
-	if sed -n 's/^[^ ]* \([^ ]*\) \([^ ]*\) .*$/\2/p' /proc/mounts | 
-		grep -qE '^(nfs[1234]?|smbfs|ncp|ncpfs|coda|cifs)$'; then
-	    log_warning_msg "not deconfiguring network interfaces: network shares still mounted."
-	    exit 1
-	fi
+    if sed -n 's/^[^ ]* \([^ ]*\) \([^ ]*\) .*$/\2/p' /proc/mounts |
+        grep -qE '^(nfs[1234]?|smbfs|ncp|ncpfs|coda|cifs)$'; then
+        log_warning_msg "not deconfiguring network interfaces: network shares still mounted."
+        exit 1
+    fi
 
-	log_action_begin_msg "Deconfiguring network interfaces"
-	ip addr flush dev lanif
-	brctl delif lanif eth0.1
-#	brctl delif lanif wlan0
-	brctl delbr lanif
+    log_action_begin_msg "Deconfiguring network interfaces"
+    ip addr flush dev lanif
+    brctl delif lanif eth0.1
+#   brctl delif lanif wlan0
+    brctl delbr lanif
 
     ip link delete link dev eth0.1
     ip link delete link dev eth0.2
@@ -160,13 +160,13 @@ stop)
     ip link set lan3 down
     ip link set lan4 down
 
-	#ifupdown lo down
-	;;
+    #ifupdown lo down
+    ;;
 
 *)
-	echo "Usage: /etc/init.d/networking {start|stop}. But preferably, use this script via systemd (service 'network')"
-	exit 1
-	;;
+    echo "Usage: /etc/init.d/networking {start|stop}. But preferably, use this script via systemd (service 'network')"
+    exit 1
+    ;;
 esac
 
 exit 0
