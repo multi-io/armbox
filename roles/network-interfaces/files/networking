@@ -101,15 +101,24 @@ start)
     brctl addif physical_switch lan4
     brctl addif physical_switch wan
 
+    # VLAN 1 = LAN
+    # VLAN 2 = WAN
+    # VLAN 3 = management access
+    #
     # 1 is the default vid (VLAN ID), all interfaces belong to it initially
     # (see "bridge vlan show" after a clean reboot and brctl addbr+addif sequence).
-    # Hence only vid 2 must be added to an interface explicitly. vid 1 must be REMOVED explicitly.
-    # So we use vid 1 for the VLAN of all the local ports (i.e. all but the "wan" port),
-    # and vid 2 for the VLAN of the wan port.
+    # Hence only vid 2 and 3 must be added to an interface explicitly. vid 1 must be REMOVED explicitly.
+    # So we use vid 1 for the VLAN of all the local ports (i.e. all but the "wan" and "lan4" port),
+    # vid 2 for the VLAN of the wan port, vid 3 for the management port (i.e the "lan4" port -- physically opposite of the wan port).
     ip link add link eth0 name eth0.1 type vlan id 1
     ip link add link eth0 name eth0.2 type vlan id 2
+    ip link add link eth0 name eth0.3 type vlan id 3
+
     bridge vlan add vid 2 dev wan pvid untagged
     bridge vlan del vid 1 dev wan
+
+    bridge vlan add vid 3 dev lan4 pvid untagged
+    bridge vlan del vid 1 dev lan4
 
     ip link set wan up
     ip link set lan1 up
@@ -133,6 +142,10 @@ start)
     ip link set lanif up
     #ip -6 link set lanif mtu 1400  # for better IPv6 compatibility...  # distributed via radvd.conf to LAN hosts
     echo 1400 >/proc/sys/net/ipv6/conf/lanif/mtu  # for IPv6 only (does this really work?)
+
+    # management IP
+    ip addr add 192.168.112.1/24 dev eth0.3
+    ip link set eth0.3 up
 
     log_action_end_msg $?
 
