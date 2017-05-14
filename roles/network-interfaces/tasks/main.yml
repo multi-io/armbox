@@ -10,10 +10,15 @@
     - wpasupplicant
     - swconfig
 
-- name: upload networking init script
+- name: remove default networking init script
+  file:
+    path: /etc/init.d/networking
+    state: absent
+
+- name: upload networking service script
   copy:
-    src: files/networking
-    dest: /etc/init.d/networking
+    src: files/networking-service
+    dest: /usr/local/bin/networking-service
     mode: 0755
 
 - name: upload networking service unit

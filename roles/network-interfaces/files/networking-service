@@ -1,22 +1,19 @@
 #!/bin/sh -e
-### BEGIN INIT INFO
-# Provides:          networking
-# Required-Start:    mountvirtfs ifupdown $local_fs
-# Default-Start:     S
-# Default-Stop:      0 6
-### END INIT INFO
-
-## Monolithic networking service script. Meant to be used
-## as the ExecStart script of the systemd networking.service.
+## Monolithic networking-service service script. Meant to be used
+## as the ExecStart script of the systemd networking-service.service.
 ##
 ## Monolithic in the sense that the ifup-/-down commands,
 ## /etc/network/interfaces configuration file
 ## and corresponding ifup@ services to start up individual interfaces
 ## are not supported. The whole network is started and stopped
-## in this script. Reason: Didn't want to bother to map
+## in this script. Reason: Didn't want to bother mapping
 ## all the switch configuration to /etc/network/interfaces properly.
 ##
 ## See bridge-utils-interfaces(8) for how to do the latter instead.
+
+if [ -n "$DEBUG" ]; then
+    set -x
+fi
 
 PATH="/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin"
 
@@ -81,7 +78,12 @@ process_options() {
 }
 
 case "$1" in
+
 start)
+    if ip link show physical_switch >/dev/null 2>&1; then
+        exit 0;
+    fi
+
     process_options
     log_action_begin_msg "Configuring network interfaces"
 
@@ -151,6 +153,7 @@ start)
 
     ;;
 
+
 stop)
     if sed -n 's/^[^ ]* \([^ ]*\) \([^ ]*\) .*$/\2/p' /proc/mounts |
         grep -qE '^(nfs[1234]?|smbfs|ncp|ncpfs|coda|cifs)$'; then
@@ -162,10 +165,12 @@ stop)
     ip addr flush dev lanif
     brctl delif lanif eth0.1
 #   brctl delif lanif wlan0
+    ip link set lanif down
     brctl delbr lanif
 
     ip link delete link dev eth0.1
     ip link delete link dev eth0.2
+    ip link delete link dev eth0.3
     brctl delbr physical_switch
     ip link set wan down
     ip link set lan1 down
@@ -176,8 +181,16 @@ stop)
     #ifupdown lo down
     ;;
 
+
+reload)
+    $0 stop
+    sleep 1
+    $0 start
+
+    ;;
+
 *)
-    echo "Usage: /etc/init.d/networking {start|stop}. But preferably, use this script via systemd (service 'network')"
+    echo "Usage: $0 {start|stop|reload}. But preferably, use this script via systemd (unit 'network.service')"
     exit 1
     ;;
 esac
