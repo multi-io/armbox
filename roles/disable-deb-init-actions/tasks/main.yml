@@ -1,0 +1,5 @@
+- name: disable init actions for package installations
+  copy:
+    src: files/policy-rc.d
+    dest: /usr/sbin/policy-rc.d
+    mode: "0755"
