@@ -4,5 +4,6 @@
   roles:
     - disable-deb-init-actions
     - disable-armbian-firstlogin
+    - authorized_keys
     - network-interfaces
     - accesspoint
