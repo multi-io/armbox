@@ -5,4 +5,4 @@
     - disable-deb-init-actions
     - disable-armbian-firstlogin
     - network-interfaces
-
+    - accesspoint

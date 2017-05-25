@@ -1,0 +1,8 @@
+---
+
+- name: install needed access point packages
+  package:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - hostapd
