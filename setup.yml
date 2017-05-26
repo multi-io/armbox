@@ -7,3 +7,4 @@
     - authorized_keys
     - { role: network-interfaces, tags: ['ifaces'] }
     - { role: accesspoint, tags: ['ap'] }
+    - { role: dnsmasq, tags: ['dnsmasq'] }
