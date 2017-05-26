@@ -16,8 +16,8 @@
     state: absent
 
 - name: upload networking service script
-  copy:
-    src: files/networking-service
+  template:
+    src: templates/networking-service.j2
     dest: /usr/local/bin/networking-service
     mode: 0755
 
