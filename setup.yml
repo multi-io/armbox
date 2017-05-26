@@ -5,5 +5,5 @@
     - disable-deb-init-actions
     - disable-armbian-firstlogin
     - authorized_keys
-    - network-interfaces
-    - accesspoint
+    - { role: network-interfaces, tags: ['ifaces'] }
+    - { role: accesspoint, tags: ['ap'] }
