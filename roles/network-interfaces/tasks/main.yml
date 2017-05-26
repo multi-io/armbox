@@ -20,16 +20,18 @@
     src: templates/networking-service.j2
     dest: /usr/local/bin/networking-service
     mode: 0755
+  notify: restart networking service
 
 - name: upload networking service unit
   copy:
     src: files/networking.service
     dest: /etc/systemd/system/networking.service
     mode: 0644
+  notify: restart networking service
 
 - name: enable and start networking service
   systemd:
     name: networking.service
-    state: started
     enabled: True
     daemon_reload: True
+  notify: restart networking service

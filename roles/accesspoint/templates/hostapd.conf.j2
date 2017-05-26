@@ -3,7 +3,7 @@
 
 # AP netdevice name (without 'ap' postfix, i.e., wlan0 uses wlan0ap for
 # management frames with the Host AP driver); wlan0 with many nl80211 drivers
-interface=wlan0
+interface={{wlan_interface}}
 
 # In case of atheros and nl80211 driver interfaces, an additional
 # configuration parameter, bridge, may be used to notify hostapd if the
@@ -16,13 +16,13 @@ interface=wlan0
 # added to the bridge automatically (brctl may refuse to do this before hostapd
 # has been started to change the interface mode). If needed, the bridge
 # interface is also created.
-#bridge=br0
+bridge={{wlan_bridge}}
 
 # Driver interface type (hostap/wired/none/nl80211/bsd);
 # default: hostap). nl80211 is used with all Linux mac80211 drivers.
 # Use driver=none if building hostapd as a standalone RADIUS server that does
 # not control any wireless/wired driver.
-# driver=hostap
+driver={{wlan_driver}}
 
 # Driver interface parameters (mainly for development testing use)
 # driver_params=<params>
@@ -83,7 +83,7 @@ ctrl_interface_group=0
 ##### IEEE 802.11 related configuration #######################################
 
 # SSID to be used in IEEE 802.11 management frames
-ssid=test
+ssid={{wlan_ssid}}
 # Alternative formats for configuring SSID
 # (double quoted string, hexdump, printf-escaped string)
 #ssid2="test"
@@ -96,7 +96,7 @@ ssid=test
 # Country code (ISO/IEC 3166-1). Used to set regulatory domain.
 # Set as needed to indicate country in which device is operating.
 # This can limit available channels and transmit power.
-#country_code=US
+country_code={{wlan_country_code}}
 
 # Enable IEEE 802.11d. This advertises the country_code and the set of allowed
 # channels and transmit power levels based on the regulatory limits. The
@@ -131,7 +131,7 @@ ssid=test
 # can be used to indicate that any support band can be used. This special case
 # is currently supported only with drivers with which offloaded ACS is used.
 # Default: IEEE 802.11b
-hw_mode=g
+hw_mode={{wlan_hw_mode}}
 
 # Channel number (IEEE 802.11)
 # (default: 0, i.e., not set)
@@ -141,7 +141,7 @@ hw_mode=g
 # If CONFIG_ACS build option is enabled, the channel can be selected
 # automatically at run time by setting channel=acs_survey or channel=0, both of
 # which will enable the ACS survey based algorithm.
-channel=1
+channel={{wlan_channel}}
 
 # ACS tuning - Automatic Channel Selection
 # See: http://wireless.kernel.org/en/users/Documentation/acs
@@ -470,7 +470,7 @@ wmm_ac_vo_acm=0
 # 0 = disabled (default)
 # 1 = enabled
 # Note: You will also need to enable WMM for full HT functionality.
-#ieee80211n=1
+#ieee80211n={{wlan_ieee80211n}}
 
 # ht_capab: HT capabilities (list of flags)
 # LDPC coding capability: [LDPC] = supported
@@ -1071,7 +1071,7 @@ own_ip_addr=127.0.0.1
 # and/or WPA2 (full IEEE 802.11i/RSN):
 # bit0 = WPA
 # bit1 = IEEE 802.11i/RSN (WPA2) (dot11RSNAEnabled)
-#wpa=1
+wpa=1
 
 # WPA pre-shared keys for WPA-PSK. This can be either entered as a 256-bit
 # secret in hex format (64 hex digits), wpa_psk, or as an ASCII passphrase
@@ -1080,7 +1080,7 @@ own_ip_addr=127.0.0.1
 # wpa_psk (dot11RSNAConfigPSKValue)
 # wpa_passphrase (dot11RSNAConfigPSKPassPhrase)
 #wpa_psk=0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef
-#wpa_passphrase=secret passphrase
+wpa_passphrase={{wlan_wpa_passphrase}}
 
 # Optionally, WPA PSKs can be read from a separate text file (containing list
 # of (PSK,MAC address) pairs. This allows more than one PSK to be configured.
@@ -1102,6 +1102,7 @@ own_ip_addr=127.0.0.1
 # added to enable SHA256-based stronger algorithms.
 # (dot11RSNAConfigAuthenticationSuitesTable)
 #wpa_key_mgmt=WPA-PSK WPA-EAP
+wpa_key_mgmt=WPA-PSK
 
 # Set of accepted cipher suites (encryption algorithms) for pairwise keys
 # (unicast packets). This is a space separated list of algorithms:
@@ -1113,25 +1114,25 @@ own_ip_addr=127.0.0.1
 # TKIP will be used as the group cipher.
 # (dot11RSNAConfigPairwiseCiphersTable)
 # Pairwise cipher for WPA (v1) (default: TKIP)
-#wpa_pairwise=TKIP CCMP
+wpa_pairwise=TKIP CCMP
 # Pairwise cipher for RSN/WPA2 (default: use wpa_pairwise value)
 #rsn_pairwise=CCMP
 
 # Time interval for rekeying GTK (broadcast/multicast encryption keys) in
 # seconds. (dot11RSNAConfigGroupRekeyTime)
-#wpa_group_rekey=600
+wpa_group_rekey=600
 
 # Rekey GTK when any STA that possesses the current GTK is leaving the BSS.
 # (dot11RSNAConfigGroupRekeyStrict)
-#wpa_strict_rekey=1
+wpa_strict_rekey=1
 
 # Time interval for rekeying GMK (master key used internally to generate GTKs
 # (in seconds).
-#wpa_gmk_rekey=86400
+wpa_gmk_rekey=86400
 
 # Maximum lifetime for PTK in seconds. This can be used to enforce rekeying of
 # PTK to mitigate some attacks against TKIP deficiencies.
-#wpa_ptk_rekey=600
+wpa_ptk_rekey=600
 
 # Enable IEEE 802.11i/RSN/WPA2 pre-authentication. This is used to speed up
 # roaming be pre-authenticating IEEE 802.1X/EAP part of the full RSN

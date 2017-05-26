@@ -1,0 +1,14 @@
+# /24 network in which to assign the LAN IPs.
+# must be a /24
+lan_prefix: 192.168.143
+
+# name of the (bridge) interface to create to access the LAN
+lanif_name: lanif
+
+# IP address of management interface, if any.
+# Must be outside lan_prefix.
+management_ip: 192.168.112.1
+
+
+
+wlan_wpa_passphrase: 'supergeheim'

@@ -1,0 +1,13 @@
+wlan_interface: wlan0
+wlan_bridge: "{{lanif_name}}"
+wlan_driver: nl80211
+wlan_ssid: olafhome2
+wlan_country_code: DE
+wlan_hw_mode: g
+wlan_channel: 2
+# todo automatic channel selection (see conf)
+wlan_ieee80211n: 1
+wlan_wpa_passphrase: "supersecret"
+
+
+# TODO ieee80211n
