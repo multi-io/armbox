@@ -1,3 +1,10 @@
+- name: include override vars
+  hosts: all
+  gather_facts: no
+  tags: always
+  tasks:
+    - include_vars: dir='vars_override' files_matching='.yml$'
+
 - name: router setup
   hosts: all
 

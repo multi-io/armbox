@@ -1,0 +1,19 @@
+# /24 network in which to assign the LAN IPs.
+# must be a /24
+lan_prefix: 192.168.100
+
+# name of the (bridge) interface to create to access the LAN
+lanif_name: lanif
+
+# IP address of management interface, if any.
+# Must be outside lan_prefix.
+management_ip: 192.168.200.1
+
+wlan_wpa_passphrase: 'supersecret'
+
+
+dhcp_static_mappings:
+  'd0:50:11:22:33:44': '2'
+  'a0:0b:aa:bb:cc:dd': '7'
+# 'mac': 'ip_hostpart (relative to lan_prefix)'
+

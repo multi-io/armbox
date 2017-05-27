@@ -9,6 +9,11 @@ lanif_name: lanif
 # Must be outside lan_prefix.
 management_ip: 192.168.112.1
 
-
-
 wlan_wpa_passphrase: 'supergeheim'
+
+#dhcp_static_mappings:
+#  'd0:50:aa:bb:cc:dd': '2'
+#  '00:17:11:22:33:44': '5'
+## 'mac': 'ip_hostpart (relative to lan_prefix)'
+
+dhcp_static_mappings: {}

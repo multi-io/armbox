@@ -6,33 +6,17 @@
     - resolvconf
     - dnsmasq
 
-#- name: roll out hostapd config
-#  template:
-#    src: templates/hostapd.conf.j2
-#    dest: /etc/hostapd/hostapd.conf
-#
-#- name: remove default hostapd init script
-#  file:
-#    path: /etc/init.d/hostapd
-#    state: absent
-#
-#- name: remove hostapd defaults
-#  file:
-#    path: /etc/default/hostapd
-#    state: absent
-#
-#- name: upload hostapd service unit
-#  copy:
-#    src: files/hostapd.service
-#    dest: /etc/systemd/system/hostapd.service
-#    mode: 0644
-#  notify: restart hostapd service
-#
-#- name: enable and start hostapd service
-#  systemd:
-#    name: hostapd.service
-#    enabled: True
-#    state: started
-#    daemon_reload: True
-#    detect_early_failure: yes
-#  notify: restart hostapd service
+- name: roll out dnsmasq config
+  template:
+    src: templates/dnsmasq.conf.j2
+    dest: /etc/dnsmasq.conf
+  notify: restart dnsmasq service
+
+- name: enable and start dnsmasq service
+  systemd:
+    name: dnsmasq.service
+    enabled: True
+    state: started
+    daemon_reload: True
+    detect_early_failure: yes
+  notify: restart dnsmasq service
