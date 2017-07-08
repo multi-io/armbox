@@ -1,0 +1,3 @@
+forwarded_ports: []
+
+outgoing_interface: ppp0

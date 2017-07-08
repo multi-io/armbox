@@ -1,0 +1,40 @@
+#! /bin/sh
+
+#TODO: integrate into firewall (or firewall into routing)
+
+IPTABLES=/sbin/iptables
+
+# See how we were called.
+case "$1" in
+
+  start)
+        echo "Starting IP routing (forwarding with NAT/masquerading)"
+        echo 1 >/proc/sys/net/ipv4/ip_forward
+        echo 1 >/proc/sys/net/ipv6/conf/all/forwarding
+        modprobe ipt_MASQUERADE
+
+        # NAT/Masquerading fpr packets going into the internet
+        $IPTABLES -t nat -A POSTROUTING -o {{outgoing_interface}} -j MASQUERADE
+        ;;
+
+  stop)
+        echo -n "Stopping routing"
+        $IPTABLES -t nat -F
+        echo 0 >/proc/sys/net/ipv4/ip_forward
+        echo
+        rm -f /var/lock/subsys/myrouting
+        ;;
+
+  status)
+        echo '>>> table "nat":'
+        $IPTABLES -t nat -vL
+        ;;
+
+  restart|reload)
+        ;;
+  *)
+        echo "Usage: myrouting {start|stop|status|restart|reload}"
+        exit 1
+esac
+
+exit 0

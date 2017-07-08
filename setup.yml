@@ -16,4 +16,5 @@
     - { role: network-interfaces, tags: ['ifaces'] }
     - { role: accesspoint, wlan_interface: 'wlan1', tags: ['ap'] }
     - { role: dns, tags: ['dns'] }
+    - { role: routing, tags: ['routing'] }
     - { role: adsl, tags: ['adsl'] }
