@@ -9,6 +9,14 @@ lanif_name: lanif
 # Must be outside lan_prefix.
 management_ip: 192.168.200.1
 
+# local host's name
+local_hostname: myrouter
+
+# local domain name
+local_domainname: home.mylocal
+
+wlan_ssid: olafhome2
+wlan_country_code: DE
 wlan_wpa_passphrase: 'supersecret'
 
 
@@ -17,3 +25,8 @@ dhcp_static_mappings:
   'a0:0b:aa:bb:cc:dd': '7'
 # 'mac': 'ip_hostpart (relative to lan_prefix)'
 
+dns_static_mappings:
+  - "{{lan_prefix}}.2   tack"
+  - "{{lan_prefix}}.2   tack.{{local_domainname}}"
+  - "{{lan_prefix}}.7   phone"
+  - "{{lan_prefix}}.7   phone.{{local_domainname}}"
