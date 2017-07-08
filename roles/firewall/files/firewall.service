@@ -1,0 +1,17 @@
+[Unit]
+Description=Set Up firewall
+Wants=network.target
+Before=network.target multi-user.target shutdown.target
+After=dbus.service network-pre.target systemd-sysusers.service
+Conflicts=shutdown.target
+
+[Service]
+Type=oneshot
+IgnoreSIGPIPE=no
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/firewall-service start
+ExecStop=/usr/local/bin/firewall-service stop
+ExecReload=/usr/local/bin/firewall-service reload
+
+[Install]
+WantedBy=multi-user.target

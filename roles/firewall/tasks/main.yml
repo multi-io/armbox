@@ -1,0 +1,20 @@
+- name: upload firewall service script
+  template:
+    src: templates/firewall-service.j2
+    dest: /usr/local/bin/firewall-service
+    mode: 0755
+  notify: restart firewall service
+
+- name: upload firewall service unit
+  copy:
+    src: files/firewall.service
+    dest: /etc/systemd/system/firewall.service
+    mode: 0644
+  notify: restart firewall service
+
+- name: enable and start firewall service
+  systemd:
+    name: firewall.service
+    enabled: True
+    daemon_reload: True
+  notify: restart firewall service
