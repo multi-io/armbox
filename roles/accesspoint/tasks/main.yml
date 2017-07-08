@@ -11,9 +11,6 @@
     dest: /etc/hostapd/hostapd.conf
   notify: restart hostapd service
 
-# TODO latest armbian hostapd package comes with preinstalled /etc/hostapd.conf -- need to overwrite that or
-#      disable it in /etc/defaults/hostapd
-
 - name: remove default hostapd init script
   file:
     path: /etc/init.d/hostapd

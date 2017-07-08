@@ -12,6 +12,7 @@
     - disable-deb-init-actions
     - disable-armbian-firstlogin
     - authorized_keys
+    - firmware-atheros
     - { role: network-interfaces, tags: ['ifaces'] }
-    - { role: accesspoint, tags: ['ap'] }
+    - { role: accesspoint, wlan_interface: 'wlan1', tags: ['ap'] }
     - { role: dnsmasq, tags: ['dnsmasq'] }

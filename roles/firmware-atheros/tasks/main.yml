@@ -1,0 +1,17 @@
+- name: disable builtin WLAN
+  lineinfile:
+    path: /etc/modprobe.d/blacklist.conf
+    line: "{{item}}"
+    create: yes
+  with_items:
+    - 'blacklist rtl8192cu'
+    - 'blacklist rtl_usb'
+    - 'blacklist rtl8192c_common'
+    - 'blacklist rtlwifi'
+
+- name: install Atheros firmware
+  package:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - firmware-atheros
