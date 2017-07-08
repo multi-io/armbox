@@ -30,3 +30,7 @@ dns_static_mappings:
   - "{{lan_prefix}}.2   tack.{{local_domainname}}"
   - "{{lan_prefix}}.7   phone"
   - "{{lan_prefix}}.7   phone.{{local_domainname}}"
+
+
+adsl_user: myuser
+adsl_password: mypassword

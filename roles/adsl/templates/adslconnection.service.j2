@@ -1,0 +1,19 @@
+[Unit]
+Description=ADSL internet connection
+Wants=network.target
+Before=network.target multi-user.target shutdown.target
+After=networking.service
+Conflicts=shutdown.target
+
+[Service]
+Type=simple
+
+ExecStartPre=/sbin/ip link set dev {{wan_interface}} mtu 1500
+ExecStartPre=/sbin/modprobe ppp_generic
+ExecStartPre=/sbin/modprobe ppp_async
+ExecStartPre=/sbin/modprobe ppp_synctty
+
+ExecStart=/usr/sbin/pppd call adsl-connection
+
+[Install]
+WantedBy=multi-user.target

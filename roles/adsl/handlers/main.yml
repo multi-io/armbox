@@ -1,0 +1,4 @@
+- name: restart ADSL connection
+  systemd:
+    name: adslconnection.service
+    state: restarted

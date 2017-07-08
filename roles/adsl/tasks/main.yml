@@ -1,0 +1,34 @@
+- name: install packages
+  apt:
+    name: "{{item}}"
+    state: present
+    allow_unauthenticated: yes
+  with_items:
+    - pppoe
+
+- name: setup PAP secrets
+  lineinfile:
+    path: /etc/ppp/pap-secrets
+    line: "{{adsl_user}}      *     {{adsl_password}}"
+    create: yes
+  notify: restart ADSL connection
+
+- name: upload pppd config
+  template:
+    src: templates/adsl-connection.j2
+    dest: /etc/ppp/peers/adsl-connection
+  notify: restart ADSL connection
+
+- name: upload adsl-connection service definition
+  template:
+    src: templates/adslconnection.service.j2
+    dest: /etc/systemd/system/adslconnection.service
+    mode: 0644
+  notify: restart ADSL connection
+
+- name: enable & activate adsl-connection service
+  systemd:
+    name: adslconnection.service
+    enabled: True
+    daemon_reload: True
+  notify: restart ADSL connection
