@@ -1,3 +1,6 @@
+# CHANGE THIS
+root_password: 'EcElchyeib'
+
 # /24 network in which to assign the LAN IPs.
 # must be a /24
 lan_prefix: 192.168.143

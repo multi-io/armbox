@@ -28,6 +28,7 @@
     - "{{lan_prefix}}.1   {{local_hostname}}"
     - "{{lan_prefix}}.1   {{local_hostname}}.{{local_domainname}}"
     - "{{dns_static_mappings}}"
+    # TODO replace existing lines w/ the same hostname
 
 - name: enable and start dnsmasq service
   systemd:

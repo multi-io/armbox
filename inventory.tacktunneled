@@ -1,1 +1,0 @@
-routerbox ansible_user=root ansible_ssh_common_args='-o ProxyCommand="ssh -q -o ForwardAgent=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -W 192.168.112.1:%p olaf@tack"'

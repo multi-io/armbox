@@ -1,3 +1,10 @@
+# CHANGE THIS
+root_password: 'EcElchyeib'
+
+authorized_keys:
+  - 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDVho9lnXa..... olaf@tackd'
+  - 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDWd8tYrRP..... oklischat@Olafs-MacBook-Air.local'
+
 # /24 network in which to assign the LAN IPs.
 # must be a /24
 lan_prefix: 192.168.100
