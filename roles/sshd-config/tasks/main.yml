@@ -1,0 +1,9 @@
+- name: set sshd options
+  lineinfile:
+    dest: /etc/ssh/sshd_config
+    regexp: "^{{item[0]}}"
+    line: "{{item[0]}} {{item[1]}}"
+  with_items:
+    - "{{sshd_options}}"
+  notify:
+    - restart sshd service

@@ -10,6 +10,7 @@
 
   roles:
     - disable-deb-init-actions
+    - sshd-config
     - rootuser-setup
     - firmware-atheros
     - { role: network-interfaces, tags: ['ifaces'] }

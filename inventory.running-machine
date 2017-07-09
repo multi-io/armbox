@@ -1,5 +1,6 @@
 # direct access via management interface
-192.168.112.1 ansible_user=root ansible_ssh_common_args='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+routerbox ansible_host=192.168.112.1 ansible_user=root ansible_ssh_common_args='-o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no'
+
 
 # access via ssh user@othermachine -> management interface
 #routerbox ansible_user=root ansible_ssh_common_args='-o ProxyCommand="ssh -q -o ForwardAgent=yes -o UserKnownHostsFile=/dev/null -o StrictHostKeyChecking=no -W 192.168.112.1:%p user@othermachine"'

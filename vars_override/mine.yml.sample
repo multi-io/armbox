@@ -22,10 +22,13 @@ local_hostname: myrouter
 # local domain name
 local_domainname: home.mylocal
 
+# WLAN config
 wlan_ssid: olafhome2
 wlan_country_code: DE
 wlan_wpa_passphrase: 'supersecret'
 
+
+# static DHCP and DNS mappings
 
 dhcp_static_mappings:
   'd0:50:11:22:33:44': '2'
@@ -39,5 +42,11 @@ dns_static_mappings:
   - "{{lan_prefix}}.7   phone.{{local_domainname}}"
 
 
+# settings for OpenSSH daemon
+sshd_options:
+  - ['PasswordAuthentication', 'no']
+  - ['PermitRootLogin', 'yes']  # needed by the default make setup-running-machine
+
+# ADSL setup
 adsl_user: myuser
 adsl_password: mypassword
