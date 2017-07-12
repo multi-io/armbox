@@ -6,19 +6,6 @@
   with_items:
     - ddclient
 
-- name: create dyndns-publish group
-  group:
-    name: "{{dyndns_username}}"
-    state: present
-
-- name: create dyndns-publish user
-  user:
-    name: "{{dyndns_username}}"
-    group: "{{dyndns_username}}"
-    createhome: no
-    system: yes
-    state: present
-
 - name: upload dyndns-publish service scripts
   template:
     src: "templates/{{item}}.j2"
