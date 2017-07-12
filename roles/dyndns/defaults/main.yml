@@ -1,0 +1,3 @@
+outgoing_interface: ppp0
+
+dyndns_username: 'dyndns'

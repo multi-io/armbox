@@ -50,3 +50,9 @@ sshd_options:
 # ADSL setup
 adsl_user: myuser
 adsl_password: mypassword
+
+# DynDNS setup
+dyndns_proto: 'freedns'
+dyndns_login: 'myuser'
+dyndns_password: 'somepassword'
+dyndns_hostname: 'myhost.mooo.com'

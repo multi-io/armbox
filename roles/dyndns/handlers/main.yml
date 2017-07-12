@@ -1,0 +1,4 @@
+- name: restart dyndns-publish service
+  systemd:
+    name: dyndns-publish.service
+    state: restarted

@@ -1,0 +1,51 @@
+- name: install packages
+  apt:
+    name: "{{item}}"
+    state: present
+    allow_unauthenticated: yes
+  with_items:
+    - ddclient
+
+- name: create dyndns-publish group
+  group:
+    name: "{{dyndns_username}}"
+    state: present
+
+- name: create dyndns-publish user
+  user:
+    name: "{{dyndns_username}}"
+    group: "{{dyndns_username}}"
+    createhome: no
+    system: yes
+    state: present
+
+- name: upload dyndns-publish service scripts
+  template:
+    src: "templates/{{item}}.j2"
+    dest: "/usr/local/sbin/{{item}}"
+    mode: 0755
+  with_items:
+    - 'publish_ip_continuously'
+    - 'get_wan_ip'
+  notify: restart dyndns-publish service
+
+- name: upload dyndns configuration
+  template:
+    src: templates/ddclient.conf.j2
+    dest: /etc/ddclient.conf
+    mode: 0644
+  notify: restart dyndns-publish service
+
+- name: upload dyndns service
+  template:
+    src: templates/dyndns-publish.service.j2
+    dest: /etc/systemd/system/dyndns-publish.service
+    mode: 0644
+  notify: restart dyndns-publish service
+
+- name: enable & activate dyndns service
+  systemd:
+    name: dyndns-publish.service
+    enabled: True
+    daemon_reload: True
+  notify: restart dyndns-publish service

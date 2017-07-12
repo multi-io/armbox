@@ -19,3 +19,4 @@
     - { role: firewall, tags: ['firewall'] }
     - { role: routing, tags: ['routing'] }
     - { role: adsl, tags: ['adsl'] }
+    - { role: dyndns, tags: ['dyndns'] }

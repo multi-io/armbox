@@ -1,0 +1,18 @@
+[Unit]
+Description=ADSL internet connection
+Wants=network.target
+Before=network.target multi-user.target shutdown.target
+After=networking.service
+Conflicts=shutdown.target
+
+StartLimitInterval=15s
+StartLimitBurst=5
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/publish_ip_continuously
+User={{dyndns_username}}
+Group={{dyndns_username}}
+
+[Install]
+WantedBy=multi-user.target
