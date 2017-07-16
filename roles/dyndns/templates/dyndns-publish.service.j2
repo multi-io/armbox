@@ -1,12 +1,9 @@
 [Unit]
-Description=ADSL internet connection
+Description=DynDNS IP publishing
 Wants=network.target
 Before=network.target multi-user.target shutdown.target
 After=networking.service
 Conflicts=shutdown.target
-
-StartLimitInterval=15s
-StartLimitBurst=5
 
 [Service]
 Type=simple

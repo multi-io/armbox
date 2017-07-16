@@ -1,17 +1,17 @@
-#!/bin/sh
+#!/bin/bash
 
 set -e
 
 ip=$(ifconfig ppp0 2>/dev/null | perl -ne "/inet addr:(.*?) / && print \$1")
 
-if [ -n "$ip" ] && ! [[ "$ip" == 192.168.* ]]; then
+if [ -n "$ip" ] && ! [ "$ip" == 192.168.* ]; then
   echo "$ip"
   exit 0
 fi
 
 ip=$(timeout 2 curl http://alice.box/diagnostic.htm 2>/dev/null | perl -ne "/var wan_ip='(.*?)';/ && print \$1")
 
-if [ -n "$ip" ] && ! [[ "$ip" == 192.168.* ]] && ! [[ "$ip" == '0.0.0.0' ]]; then
+if [ -n "$ip" ] && ! [ "$ip" == 192.168.* ] && ! [ "$ip" == '0.0.0.0' ]; then
   echo "$ip"
   exit 0
 fi

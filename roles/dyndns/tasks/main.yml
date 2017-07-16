@@ -20,7 +20,7 @@
   template:
     src: templates/ddclient.conf.j2
     dest: /etc/ddclient.conf
-    mode: 0644
+    mode: 0600
   notify: restart dyndns-publish service
 
 - name: upload dyndns service
