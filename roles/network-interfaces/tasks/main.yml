@@ -10,13 +10,6 @@
     - wpasupplicant
     - swconfig
 
-- name: install needed networking packages
-  package:
-    name: "{{item}}"
-    state: present
-  with_items:
-    - firmware-atheros
-
 - name: remove default networking init script
   file:
     path: /etc/init.d/networking

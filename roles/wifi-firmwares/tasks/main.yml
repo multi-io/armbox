@@ -9,9 +9,10 @@
     - 'blacklist rtl8192c_common'
     - 'blacklist rtlwifi'
 
-- name: install Atheros firmware
+- name: install firmware packages
   package:
     name: "{{item}}"
     state: present
   with_items:
     - firmware-atheros
+    - firmware-ralink

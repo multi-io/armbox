@@ -12,9 +12,9 @@
     - disable-deb-init-actions
     - sshd-config
     - rootuser-setup
-    - firmware-atheros
+    - wifi-firmwares
     - { role: network-interfaces, tags: ['ifaces'] }
-    - { role: accesspoint, wlan_interface: 'wlan1', tags: ['ap'] }
+    - { role: accesspoint, tags: ['ap'] }
     - { role: dns, tags: ['dns'] }
     - { role: firewall, tags: ['firewall'] }
     - { role: routing, tags: ['routing'] }
