@@ -1,0 +1,22 @@
+- name: include override vars
+  hosts: all
+  gather_facts: no
+  tags: always
+  tasks:
+    - include_vars: dir='vars_override' files_matching='.yml$'
+
+- name: router setup
+  hosts: all
+
+  roles:
+    - disable-deb-init-actions
+    - sshd-config
+    - rootuser-setup
+    - wifi-firmwares
+    - { role: network-interfaces, tags: ['ifaces'] }
+    - { role: accesspoint, tags: ['ap'] }
+    - { role: dns, tags: ['dns'] }
+    - { role: firewall, tags: ['firewall'] }
+    - { role: routing, tags: ['routing'] }
+    - { role: adsl, tags: ['adsl'] }
+    - { role: dyndns, tags: ['dyndns'] }

@@ -1,0 +1,40 @@
+- name: install dnsmasq package
+  package:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - resolvconf
+    - dnsmasq
+
+- name: roll out dnsmasq config
+  template:
+    src: templates/dnsmasq.conf.j2
+    dest: /etc/dnsmasq.conf
+  notify: restart dnsmasq service
+
+- name: set host name
+  copy:
+    content: "{{local_hostname}}"
+    dest: /etc/hostname
+
+- name: set host name (session)
+  command: "/bin/hostname {{local_hostname}}"
+
+- name: set up DNS static mappings
+  lineinfile:
+    path: /etc/hosts
+    line: "{{item}}"
+  with_items:
+    - "{{lan_prefix}}.1   {{local_hostname}}"
+    - "{{lan_prefix}}.1   {{local_hostname}}.{{local_domainname}}"
+    - "{{dns_static_mappings}}"
+    # TODO replace existing lines w/ the same hostname
+
+- name: enable and start dnsmasq service
+  systemd:
+    name: dnsmasq.service
+    enabled: True
+    state: started
+    daemon_reload: True
+    detect_early_failure: yes
+  notify: restart dnsmasq service

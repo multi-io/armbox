@@ -1,0 +1,129 @@
+#! /bin/bash
+
+# set -e
+
+execlogged() {
+  echo "executing: $@" && "$@"
+
+}
+
+logged_iptables() {
+  echo "executing: iptables $@" && /sbin/iptables "$@"
+}
+
+#IPTABLES=/sbin/iptables
+IPTABLES="execlogged /sbin/iptables"
+#IPTABLES=logged_iptables
+
+# See how we were called.
+case "$1" in
+  start)
+        echo "Starting Firewalling"
+
+# auf diesem Rechner erzeugte Pakete durchlassen,
+#  eingehende und geforwardete zunaechst droppen, bis genaue
+#  Konfiguration unten programmiert ist
+$IPTABLES -t filter -P INPUT DROP
+$IPTABLES -t filter -P OUTPUT ACCEPT
+$IPTABLES -t filter -P FORWARD DROP
+
+# eventuell bestehende Restkonfiguration loeschen
+$IPTABLES -t filter -F
+$IPTABLES -t filter -X DROPPED
+
+### vom Loopback-Interface eingehende Pakete durchlassen
+### (bessere Performance durch "short-cut"; nachfolgende Regeln
+### werden nicht mehr getestet -- richtig?)
+$IPTABLES -t filter -A INPUT -i lo -j ACCEPT
+
+### vom LAN-Interface eingehende Pakete durchlassen
+$IPTABLES -t filter -A INPUT -i {{lanif_name}} -j ACCEPT
+
+
+### ueber outgoing_interface eingehende Pakete:
+
+# neue Chain fuer zu droppende Pakete
+$IPTABLES -t filter -N DROPPED
+
+# loggen, dann droppen
+#modprobe ipt_REJECT
+$IPTABLES -t filter -A DROPPED -j LOG
+$IPTABLES -t filter -A DROPPED -j REJECT
+
+# VPN-Verkehr komplett freigeben
+$IPTABLES -t filter -A FORWARD -i {{lanif_name}} -o ppp1 -j ACCEPT
+$IPTABLES -t filter -A FORWARD -i ppp1 -o {{lanif_name}} -j ACCEPT
+
+# LAN und loopback durchlassen
+$IPTABLES -t filter -A FORWARD -i {{lanif_name}} -o {{lanif_name}} -j ACCEPT
+$IPTABLES -t filter -A FORWARD -i lo -j ACCEPT
+
+# eingehende Pakete, die zu einer zuvor geoeffneten Verbindung gehoeren, durchlassen
+$IPTABLES -t filter -A INPUT -m state --state 'ESTABLISHED,RELATED' -j ACCEPT
+
+# WAN-Interfaces Konfiguration
+
+# geroutete Pakete: nur von innen nach aussen und zugehorige von
+# aussen nach innen durchlassen.
+# => ueber outgoing_interface eingehende Pakete, die ins LAN geroutet wuerden,
+# werden per Default-Policy gedroppt
+# (fuer den Fall, dass es jmd. schafft, solche Pakete zu erzeugen)
+$IPTABLES -t filter -A FORWARD -i {{lanif_name}} -o {{outgoing_interface}} -j ACCEPT
+$IPTABLES -t filter -A FORWARD -i {{outgoing_interface}} -o {{lanif_name}} -m state --state 'ESTABLISHED,RELATED' -j ACCEPT
+
+# X11, http-proxy, approx, nfsd,  droppen
+$IPTABLES -t filter -A INPUT -i {{outgoing_interface}} -p tcp --destination-port 5900:6100 -j DROPPED
+$IPTABLES -t filter -A INPUT -i {{outgoing_interface}} -p tcp -m multiport --destination-ports 8080,8081,9999,2049,$RPC_MOUNTD_PORT,$RPC_STATD_PORT,$RPC_STATD_OUTPORT -j DROPPED
+$IPTABLES -t filter -A INPUT -i {{outgoing_interface}} -p udp -m multiport --destination-ports 2049,$RPC_MOUNTD_PORT,$RPC_STATD_PORT,$RPC_STATD_OUTPORT -j DROPPED
+
+
+# ssh durchlassen (mit logging)
+$IPTABLES -t filter -A INPUT -i {{outgoing_interface}} -p tcp -m tcp --destination-port 22 -j LOG --log-prefix "+++ incoming {{outgoing_interface}}/22/tcp" --log-ip-options --log-tcp-options
+$IPTABLES -t filter -A INPUT -i {{outgoing_interface}} -p tcp -m tcp --destination-port 22 -j ACCEPT
+
+# privilegierte Ports droppen
+$IPTABLES -t filter -A INPUT -i {{outgoing_interface}} -p tcp --destination-port 0:1024 -j DROPPED
+
+
+
+### Rest (i.e. unpriv. Ports != X11,http-proxy) durchlassen (Default-Policy)
+
+$IPTABLES -t filter -P INPUT ACCEPT
+
+
+#        /etc/rc.d/init.d/permit-ssh-logins
+
+        touch /var/lock/subsys/myfirewall
+        ;;
+
+
+  stop)
+        echo -n "Stoppe Firewalling"
+$IPTABLES -t filter -P INPUT ACCEPT
+$IPTABLES -t filter -P OUTPUT ACCEPT
+$IPTABLES -t filter -P FORWARD ACCEPT
+
+$IPTABLES -t filter -F
+$IPTABLES -t filter -X DROPPED
+
+        echo
+        rm -f /var/lock/subsys/myfirewall
+        ;;
+
+
+  status)
+        echo '>>> table "filter":'
+        $IPTABLES -t filter -vL
+        echo '>>> table "nat":'
+        $IPTABLES -t nat -vL
+        echo '>>> table "mangle":'
+        $IPTABLES -t mangle -vL
+        ;;
+  restart|reload)
+        ;;
+  *)
+        echo "Usage: firewall-service {start|stop|status|restart|reload}"
+        exit 1
+esac
+
+exit 0

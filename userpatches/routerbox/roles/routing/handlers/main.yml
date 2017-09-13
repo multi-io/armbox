@@ -1,0 +1,4 @@
+- name: restart routing service
+  systemd:
+    name: routing.service
+    state: restarted

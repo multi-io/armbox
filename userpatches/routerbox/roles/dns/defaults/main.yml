@@ -1,0 +1,7 @@
+local_hostname: myrouter
+
+local_domainname: home.mylocal
+
+dhcp_static_mappings: {}
+
+dns_static_mappings: {}

@@ -1,0 +1,5 @@
+- name: restart dnsmasq service
+  systemd:
+    name: dnsmasq.service
+    state: restarted
+    detect_early_failure: yes

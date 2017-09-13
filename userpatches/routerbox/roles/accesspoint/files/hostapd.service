@@ -1,0 +1,13 @@
+[Unit]
+Description=Hostapd Wifi AP Daemon
+Wants=network.target
+Before=network.target multi-user.target shutdown.target
+After=networking.service
+Conflicts=shutdown.target
+
+[Service]
+Type=simple
+ExecStart=/usr/sbin/hostapd -d /etc/hostapd/hostapd.conf
+
+[Install]
+WantedBy=multi-user.target

@@ -1,0 +1,58 @@
+# CHANGE THIS
+root_password: 'EcElchyeib'
+
+authorized_keys:
+  - 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDVho9lnXa..... olaf@tackd'
+  - 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDWd8tYrRP..... oklischat@Olafs-MacBook-Air.local'
+
+# /24 network in which to assign the LAN IPs.
+# must be a /24
+lan_prefix: 192.168.100
+
+# name of the (bridge) interface to create to access the LAN
+lanif_name: lanif
+
+# IP address of management interface, if any.
+# Must be outside lan_prefix.
+management_ip: 192.168.200.1
+
+# local host's name
+local_hostname: myrouter
+
+# local domain name
+local_domainname: home.mylocal
+
+# WLAN config
+wlan_ssid: olafhome2
+wlan_country_code: DE
+wlan_wpa_passphrase: 'supersecret'
+
+
+# static DHCP and DNS mappings
+
+dhcp_static_mappings:
+  'd0:50:11:22:33:44': '2'
+  'a0:0b:aa:bb:cc:dd': '7'
+# 'mac': 'ip_hostpart (relative to lan_prefix)'
+
+dns_static_mappings:
+  - "{{lan_prefix}}.2   tack"
+  - "{{lan_prefix}}.2   tack.{{local_domainname}}"
+  - "{{lan_prefix}}.7   phone"
+  - "{{lan_prefix}}.7   phone.{{local_domainname}}"
+
+
+# settings for OpenSSH daemon
+sshd_options:
+  - ['PasswordAuthentication', 'no']
+  - ['PermitRootLogin', 'yes']  # needed by the default make setup-running-machine
+
+# ADSL setup
+adsl_user: myuser
+adsl_password: mypassword
+
+# DynDNS setup
+dyndns_proto: 'freedns'
+dyndns_login: 'myuser'
+dyndns_password: 'somepassword'
+dyndns_hostname: 'myhost.mooo.com'

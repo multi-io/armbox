@@ -1,0 +1,22 @@
+---
+
+- name: upload routing service script
+  template:
+    src: templates/routing-service.j2
+    dest: /usr/local/bin/routing-service
+    mode: 0755
+  notify: restart routing service
+
+- name: upload routing service unit
+  copy:
+    src: files/routing.service
+    dest: /etc/systemd/system/routing.service
+    mode: 0644
+  notify: restart routing service
+
+- name: enable and start routing service
+  systemd:
+    name: routing.service
+    enabled: True
+    daemon_reload: True
+  notify: restart routing service

@@ -1,0 +1,17 @@
+[Unit]
+Description=Set Up Routing
+Wants=network.target
+Before=network.target multi-user.target shutdown.target
+After=dbus.service network-pre.target systemd-sysusers.service
+Conflicts=shutdown.target
+
+[Service]
+Type=oneshot
+IgnoreSIGPIPE=no
+RemainAfterExit=yes
+ExecStart=/usr/local/bin/routing-service start
+ExecStop=/usr/local/bin/routing-service stop
+ExecReload=/usr/local/bin/routing-service reload
+
+[Install]
+WantedBy=multi-user.target

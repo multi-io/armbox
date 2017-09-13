@@ -1,0 +1,13 @@
+[Unit]
+Description=DynDNS IP publishing
+Wants=network.target
+Before=network.target multi-user.target shutdown.target
+After=networking.service
+Conflicts=shutdown.target
+
+[Service]
+Type=simple
+ExecStart=/usr/local/sbin/publish_ip_continuously
+
+[Install]
+WantedBy=multi-user.target

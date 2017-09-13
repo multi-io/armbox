@@ -1,0 +1,37 @@
+---
+
+- name: uninstall unneeded networking packages
+  package:
+    name: "{{item}}"
+    state: absent
+  with_items:
+    - network-manager
+    - isc-dhcp-client
+    - wpasupplicant
+    - swconfig
+
+- name: remove default networking init script
+  file:
+    path: /etc/init.d/networking
+    state: absent
+
+- name: upload networking service script
+  template:
+    src: templates/networking-service.j2
+    dest: /usr/local/bin/networking-service
+    mode: 0755
+  notify: restart networking service
+
+- name: upload networking service unit
+  copy:
+    src: files/networking.service
+    dest: /etc/systemd/system/networking.service
+    mode: 0644
+  notify: restart networking service
+
+- name: enable and start networking service
+  systemd:
+    name: networking.service
+    enabled: True
+    daemon_reload: True
+  notify: restart networking service

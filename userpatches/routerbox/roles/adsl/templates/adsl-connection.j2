@@ -1,0 +1,21 @@
+pty "/usr/sbin/pppoe -I {{wan_interface}} -T 80 -U  -m 1412"
+noipdefault
+noauth
+default-asyncmap
+defaultroute
+hide-password
+nodetach
+usepeerdns
+mtu 1492
+mru 1492
+noaccomp
+noccp
+nobsdcomp
+nodeflate
+nopcomp
+novj
+novjccomp
+user {{adsl_user}}
+lcp-echo-interval 20
+lcp-echo-failure 7
+unit 0

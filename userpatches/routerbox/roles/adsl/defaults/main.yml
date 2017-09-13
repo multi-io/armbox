@@ -1,0 +1,4 @@
+wan_interface: eth0.2
+
+adsl_user: myuser
+adsl_password: mypassword

@@ -1,0 +1,26 @@
+[Unit]
+Description=ADSL internet connection
+Wants=network.target
+Before=network.target multi-user.target shutdown.target
+After=networking.service
+Conflicts=shutdown.target
+
+StartLimitInterval=15s
+StartLimitBurst=5
+
+[Service]
+Type=simple
+
+ExecStartPre=/sbin/ip link set dev {{wan_interface}} mtu 1500
+ExecStartPre=/sbin/modprobe ppp_generic
+ExecStartPre=/sbin/modprobe ppp_async
+ExecStartPre=/sbin/modprobe ppp_synctty
+
+ExecStart=/usr/sbin/pppd call adsl-connection
+
+Restart=on-success
+SuccessExitStatus=1 6 7 8 9 10 11 12 13 15 16 17 18 19
+RestartSec=1000ms
+
+[Install]
+WantedBy=multi-user.target
