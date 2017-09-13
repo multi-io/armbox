@@ -112,7 +112,8 @@ customize_image()
 	mount -o bind,ro $SRC/userpatches/overlay $SDCARD/tmp/overlay
 	display_alert "Calling image customization script" "customize-image.sh" "info"
 	chroot $SDCARD /bin/bash -c "/tmp/customize-image.sh $RELEASE $LINUXFAMILY $BOARD $BUILD_DESKTOP"
-	umount $SDCARD/tmp/overlay
+	# umount -i to work around vboxsf umount issues (https://forums.virtualbox.org/viewtopic.php?f=3&t=74982)
+	umount -i $SDCARD/tmp/overlay
 	mountpoint -q $SDCARD/tmp/overlay || rm -r $SDCARD/tmp/overlay
 } #############################################################################
 
