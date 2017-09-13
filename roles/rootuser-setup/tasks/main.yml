@@ -11,9 +11,15 @@
 - name: disable root password change requirement
   shell: chage -d -1 root
 
+- name: create /root/.ssh
+  file:
+    path: /root/.ssh
+    state: directory
+
 - name: add additional authorized_keys entries for root
   lineinfile:
-    dest: ~/.ssh/authorized_keys
+    dest: /root/.ssh/authorized_keys
     line: "{{ item }}"
+    create: yes
   with_items:
     - "{{ authorized_keys }}"
