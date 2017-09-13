@@ -1,37 +1,64 @@
-# Armbian
+# Armbox -- Automated ADSL "Home Router" Setup and Image Creation
 
-Ubuntu and Debian images for ARM based single-board computers
-https://www.armbian.com
+Based on Armbian and Routerbox (https://github.com/multi-io/routerbox).
 
-## How to build my own image or kernel?
+Supports basic network configuration, WiFi access point setup,
+iptables firewalling, DHCP and DNS for the local network, a separate
+management interface and network, ADSL uplink connectivity, DynDNS
+client setup.
 
-Supported build environments:
+Only fully implemented for the Lamobo R1 right now, but can be used as
+a basis for creating images for other boards, as long as Armbian
+supports them.
 
-- [Ubuntu Xenial 16.04 x64](http://archive.ubuntu.com/ubuntu/dists/xenial-updates/main/installer-amd64/current/images/netboot/mini.iso) guest inside a [VirtualBox](https://www.virtualbox.org/wiki/Downloads) or other virtualization software,
-- [Ubuntu Xenial 16.04 x64](http://archive.ubuntu.com/ubuntu/dists/xenial-updates/main/installer-amd64/current/images/netboot/mini.iso) guest managed by [Vagrant](https://www.vagrantup.com/). This uses Virtualbox (as above) but does so in an easily repeatable way. Please check the [Armbian with Vagrant README](https://docs.armbian.com/Developer-Guide_Using-Vagrant/) for a quick start HOWTO,
-- [Ubuntu Xenial 16.04 x64](http://archive.ubuntu.com/ubuntu/dists/xenial-updates/main/installer-amd64/current/images/netboot/mini.iso) inside a [Docker](https://www.docker.com/), [systemd-nspawn](https://www.freedesktop.org/software/systemd/man/systemd-nspawn.html) or other container environment [(example)](https://github.com/igorpecovnik/lib/pull/255#issuecomment-205045273). Building full OS images inside containers may not work, so this option is mostly for the kernel compilation,
-- [Ubuntu Xenial 16.04 x64](http://archive.ubuntu.com/ubuntu/dists/xenial-updates/main/installer-amd64/current/images/netboot/mini.iso) running natively on a dedicated PC or a server (**not** recommended unless you build kernel only, for full OS images always use virtualization as outlined above),
-- **20GB disk space** or more and **2GB RAM** or more available for the VM, container or native OS,
-- superuser rights (configured `sudo` or root access).
+## Requirements
 
-**Execution**
+Vagrant.
 
-	apt-get -y install git
-	git clone https://github.com/armbian/build
-	cd build
-	./compile.sh
+## Basic Usage
 
-You will be prompted with a selection menu for a build option, a board name, a kernel branch and an OS release. Please check the documentation for [advanced options](https://docs.armbian.com/Developer-Guide_Build-Options/) and [additional customization](https://docs.armbian.com/Developer-Guide_User-Configurations/).
+```
+# customize settings
+$ cp userpatches/routerbox/vars_override/mine.yml.sample userpatches/routerbox/vars_override/mine.yml
+$ vim userpatches/routerbox/vars_override/mine.yml  # edit settings for the image to be built
+$ make  # build the image into output/images/
+```
 
-Build process uses caching for the compilation and the debootstrap process, so consecutive runs with similar settings will be much faster.
+Run `make` to build an image into `output/images/`.
 
-## Reporting issues
+## Description
 
-Please read [this](https://github.com/igorpecovnik/lib/blob/master/.github/ISSUE_TEMPLATE.md) notice first before opening an issue.
+This repository is a fork of Armbian
+(https://github.com/armbian/build); Routerbox is included via Git
+subtree (https://git-scm.com/book/de/v1/Git-Tools-Subtree-Merging) at
+userpatches/routerbox.
 
-## More info:
+Armbian is used to set up the basic image, Routerbox is then used to
+provision it. Routerbox is an Ansible playbook containing a bunch of
+roles. It is integrated into Armbian as an image customization step
+(`userpatches/customize-image-host.sh`), so it is used automatically
+used to provision the image being built. It can also be used lateron
+to re-provision the already running machine.
 
-- [Documentation](https://docs.armbian.com/Developer-Guide_Build-Preparation/)
-- [Prebuilt images](https://www.armbian.com/download/)
-- [Support forums](https://forum.armbian.com/ "Armbian support forum")
-- [Project at Github](https://github.com/igorpecovnik/lib)
+
+## TODOs
+
+- IPv6
+
+- /var not on SD card
+
+- /var/log no space left on device
+
+- configurable port forwardings
+
+- clean up systemd network target dependencies of services
+
+- user setup:
+
+    - login user, option to disable root password ssh login
+
+- DHCP on the management interface (2nd dnsmasq instance?)
+
+- assignment of physical ethernet ports to networks (wan/lan/mgmt) configurable
+
+- service executables in /usr/local/sbin
