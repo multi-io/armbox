@@ -8,6 +8,7 @@ ubuntu-*-cloudimg-console.log
 !/config-docker.conf
 !/config-vagrant.conf
 !/config-armbox.conf
+/userpatches/routerbox/vars_override/*.yml
 
 ### output directories
 /.tmp/
@@ -21,3 +22,4 @@ cache
 *~
 \#*
 .\#*
+*.retry
