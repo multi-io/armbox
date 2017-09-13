@@ -2,4 +2,3 @@
   systemd:
     name: hostapd.service
     state: restarted
-    detect_early_failure: yes
