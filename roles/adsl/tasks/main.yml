@@ -8,7 +8,7 @@
 
 - name: setup PAP secrets
   lineinfile:
-    path: /etc/ppp/pap-secrets
+    dest: /etc/ppp/pap-secrets
     line: "{{adsl_user}}      *     {{adsl_password}}"
     create: yes
   notify: restart ADSL connection

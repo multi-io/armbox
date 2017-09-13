@@ -1,6 +1,7 @@
+
 - name: disable builtin WLAN
   lineinfile:
-    path: /etc/modprobe.d/blacklist.conf
+    dest: /etc/modprobe.d/blacklist.conf
     line: "{{item}}"
     create: yes
   with_items:
