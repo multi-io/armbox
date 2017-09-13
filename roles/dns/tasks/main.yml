@@ -22,7 +22,7 @@
 
 - name: set up DNS static mappings
   lineinfile:
-    dest: /etc/hosts
+    path: /etc/hosts
     line: "{{item}}"
   with_items:
     - "{{lan_prefix}}.1   {{local_hostname}}"
@@ -36,4 +36,5 @@
     enabled: True
     state: started
     daemon_reload: True
+    detect_early_failure: yes
   notify: restart dnsmasq service

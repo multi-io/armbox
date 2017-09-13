@@ -2,3 +2,4 @@
   systemd:
     name: ssh.service
     state: restarted
+    detect_early_failure: yes
