@@ -6,3 +6,12 @@ build:
 
 destroyvm:
 	vagrant destroy
+
+routerbox-split-latest:
+	support/git-subtree-split-latest.sh userpatches/routerbox
+
+routerbox-pull-latest:
+	support/git-subtree-pull-latest.sh userpatches/routerbox
+
+routerbox-push-origin:
+	support/git-subtree-push-origin-master.sh userpatches/routerbox
