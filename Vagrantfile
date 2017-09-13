@@ -4,7 +4,9 @@
 Vagrant.require_version ">= 1.5"
 
 $provisioning_script = <<SCRIPT
-mkdir -p /vagrant/output /vagrant/userpatches
+mkdir -p /vagrant/output /vagrant/userpatches /home/ubuntu/cache /home/ubuntu/.tmp
+ln -sf /home/ubuntu/cache /vagrant/cache
+ln -sf /home/ubuntu/.tmp /vagrant/.tmp
 chmod +x /vagrant/compile.sh /vagrant/scripts/*.sh
 SCRIPT
 
