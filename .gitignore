@@ -11,11 +11,12 @@ ubuntu-*-cloudimg-console.log
 
 ### output directories
 /.tmp/
-/output/
+/output*/
 /cache/
 /userpatches/
 
 ### General annoyances ###
 .DS_Store
 *~
-.#*
+\#*
+.\#*
