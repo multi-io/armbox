@@ -1,8 +1,0 @@
----
-
-- name: add additional authorized_keys entries
-  lineinfile:
-    dest: ~/.ssh/authorized_keys
-    line: "{{ item }}"
-  with_items:
-    - "{{ authorized_keys }}"
