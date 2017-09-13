@@ -10,6 +10,7 @@ ubuntu-*-cloudimg-console.log
 ### but not default (supplied) files
 !/config-docker.conf
 !/config-vagrant.conf
+!/config-armbox.conf
 
 ### output directories
 /.tmp/
@@ -19,3 +20,4 @@ ubuntu-*-cloudimg-console.log
 
 ### General annoyances ###
 .DS_Store
+*~
