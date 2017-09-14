@@ -9,10 +9,10 @@
   hosts: all
 
   roles:
-    - disable-deb-init-actions
-    - sshd-config
-    - rootuser-setup
-    - wifi-firmwares
+    - { role: disable-deb-init-actions, tags: ['debinitactions'] }
+    - { role: sshd-config, tags: ['sshdconfig'] }
+    - { role: rootuser-setup, tags: ['rootuser'] }
+    - { role: wifi-firmwares, tags: ['firmwares'] }
     - { role: network-interfaces, tags: ['ifaces'] }
     - { role: accesspoint, tags: ['ap'] }
     - { role: dns, tags: ['dns'] }
