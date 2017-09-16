@@ -13,4 +13,4 @@ fi
 source "$ans_dir/hacking/env-setup"
 
 # the , after the chroot location is vital...otherwise ansible bails out somehow
-ansible-playbook -c chroot  -i "$CACHEDIR/$SDCARD", "${SRC}/userpatches/routerbox/setup.yml"
+ansible-playbook -c chroot  -i "$SDCARD", "${SRC}/userpatches/routerbox/setup.yml"
