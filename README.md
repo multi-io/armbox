@@ -41,7 +41,13 @@ used to provision the image being built. It can also be used lateron
 to re-provision the already running machine.
 
 
-## TODOs
+## BUGS
+
+- proper starting order of networking, routing, firewall
+  and adslconnection services
+  
+
+## TODOs (in no particular order)
 
 - IPv6
 
@@ -50,6 +56,8 @@ to re-provision the already running machine.
 - /var/log no space left on device
 
 - configurable port forwardings
+
+- avoid stateful wlan interface naming (udev)
 
 - clean up systemd network target dependencies of services
 
