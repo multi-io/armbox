@@ -50,16 +50,9 @@ $IPTABLES -t filter -N DROPPED
 $IPTABLES -t filter -A DROPPED -j LOG
 $IPTABLES -t filter -A DROPPED -j REJECT
 
-# VPN-Verkehr komplett freigeben
-$IPTABLES -t filter -A FORWARD -i {{lanif_name}} -o ppp1 -j ACCEPT
-$IPTABLES -t filter -A FORWARD -i ppp1 -o {{lanif_name}} -j ACCEPT
-
 # LAN und loopback durchlassen
 $IPTABLES -t filter -A FORWARD -i {{lanif_name}} -o {{lanif_name}} -j ACCEPT
 $IPTABLES -t filter -A FORWARD -i lo -j ACCEPT
-
-# eingehende Pakete, die zu einer zuvor geoeffneten Verbindung gehoeren, durchlassen
-$IPTABLES -t filter -A INPUT -m state --state 'ESTABLISHED,RELATED' -j ACCEPT
 
 # WAN-Interfaces Konfiguration
 
