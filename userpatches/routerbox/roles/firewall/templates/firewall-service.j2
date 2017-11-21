@@ -62,7 +62,6 @@ $IPTABLES -t filter -A FORWARD -i lo -j ACCEPT
 # werden per Default-Policy gedroppt
 # (fuer den Fall, dass es jmd. schafft, solche Pakete zu erzeugen)
 $IPTABLES -t filter -A FORWARD -i {{lanif_name}} -o {{outgoing_interface}} -j ACCEPT
-$IPTABLES -t filter -A FORWARD -i {{outgoing_interface}} -o {{lanif_name}} -m state --state 'ESTABLISHED,RELATED' -j ACCEPT
 
 # X11, http-proxy, approx, nfsd,  droppen
 $IPTABLES -t filter -A INPUT -i {{outgoing_interface}} -p tcp --destination-port 5900:6100 -j DROPPED

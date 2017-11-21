@@ -17,14 +17,15 @@ case "$1" in
 
         # NAT/Masquerading fpr packets going into the internet
         $IPTABLES -t nat -A POSTROUTING -o {{outgoing_interface}} -j MASQUERADE
+        $IPTABLES -t filter -A FORWARD -i {{outgoing_interface}} -o {{lanif_name}} -m state --state 'ESTABLISHED,RELATED' -j ACCEPT
         ;;
 
   stop)
         echo -n "Stopping routing"
-        $IPTABLES -t nat -F
+        $IPTABLES -t nat -D POSTROUTING -o {{outgoing_interface}} -j MASQUERADE
+        $IPTABLES -t filter -D FORWARD -i {{outgoing_interface}} -o {{lanif_name}} -m state --state 'ESTABLISHED,RELATED' -j ACCEPT
         echo 0 >/proc/sys/net/ipv4/ip_forward
-        echo
-        rm -f /var/lock/subsys/myrouting
+        echo 0 >/proc/sys/net/ipv6/conf/all/forwarding
         ;;
 
   status)
