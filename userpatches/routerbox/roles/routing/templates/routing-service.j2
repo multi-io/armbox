@@ -1,7 +1,5 @@
 #! /bin/sh
 
-#TODO: integrate into firewall (or firewall into routing)
-
 set -e
 
 IPTABLES=/sbin/iptables
@@ -15,15 +13,30 @@ case "$1" in
         echo 1 >/proc/sys/net/ipv6/conf/all/forwarding
         modprobe ipt_MASQUERADE
 
-        # NAT/Masquerading fpr packets going into the internet
+        # NAT/Masquerading for packets going into the internet
         $IPTABLES -t nat -A POSTROUTING -o {{outgoing_interface}} -j MASQUERADE
         $IPTABLES -t filter -A FORWARD -i {{outgoing_interface}} -o {{lanif_name}} -m state --state 'ESTABLISHED,RELATED' -j ACCEPT
+
+      {% for pm in port_mappings %}
+        {# Destination IP+port rewriting for incoming packets. #}
+        {# The corresponding source address rewriting (to {{outgoing_interface}}'s IP) for the outgoing packets is set up by the POSTROUTING rule above. See also https://www.netfilter.org/documentation/HOWTO/NAT-HOWTO-6.html#ss6.1 / Masquerading #}
+        $IPTABLES -t nat -A PREROUTING -p tcp --dport {{pm.port}} -i {{outgoing_interface}} -j DNAT --to {{pm.destip}}:{{pm.destport}}
+        {# Let the incoming packets through the FORWARD chain. Needed because the default policy of the FORWARD chain is DROP, which is a good idea #}
+        $IPTABLES -t filter -A FORWARD -i {{outgoing_interface}} -p tcp --destination {{pm.destip}} -m tcp --destination-port {{pm.destport}} -j ACCEPT
+      {% endfor %}
+        
         ;;
 
   stop)
         echo -n "Stopping routing"
         $IPTABLES -t nat -D POSTROUTING -o {{outgoing_interface}} -j MASQUERADE
         $IPTABLES -t filter -D FORWARD -i {{outgoing_interface}} -o {{lanif_name}} -m state --state 'ESTABLISHED,RELATED' -j ACCEPT
+
+      {% for pm in port_mappings %}
+        $IPTABLES -t nat -D PREROUTING -p tcp --dport {{pm.port}} -i {{outgoing_interface}} -j DNAT --to {{pm.destip}}:{{pm.destport}}
+        $IPTABLES -t filter -D FORWARD -i {{outgoing_interface}} -p tcp --destination {{pm.destip}} -m tcp --destination-port {{pm.destport}} -j ACCEPT
+      {% endfor %}
+
         echo 0 >/proc/sys/net/ipv4/ip_forward
         echo 0 >/proc/sys/net/ipv6/conf/all/forwarding
         ;;
