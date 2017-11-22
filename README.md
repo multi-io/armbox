@@ -15,22 +15,15 @@ network interface names primarily), but can be used as a basis for
 setting up other machines.
 
 
-## TODOs
+TODOs
 
-- port mappings
+- port mappings: UDP support
 
-  - currently the DROP default policy of the FORWARD chain (set up in the firewall service,
-    applied after the routing decision) will drop any packets coming in from the internet
-    that had their target address rewritten in a prerouting rule from the router's
-    external IP to an internal IP (which is what a port mapping rule would do -- example:
-    `iptables -t nat -A PREROUTING -p tcp --dport 2022 -i ppp0 -j DNAT --to 192.168.142.16:22`)
-
-    Changing the default policy to ACCEPT would be the easiest way to let those packets
-    through and make port mapping work. Are there any security implications to this? The
-    DROP policy was meant to fend off any packets coming in from the internet with target
-    addresses in the LAN, i.e. a rfc1918 range. Would anyone actually be able to construct such
-    packets?
-
+  - probably(?) can't be done via masquerading, must use separate
+    iptables rule to statelessly rewrite of the source address & port
+    of outgoing packets to the public-facing endpoint (requires
+    changing the rule whenever the public IP changes)
+  
 - IPv6
 
 - STUN

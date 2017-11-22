@@ -41,6 +41,10 @@ dns_static_mappings:
   - "{{lan_prefix}}.7   phone"
   - "{{lan_prefix}}.7   phone.{{local_domainname}}"
 
+port_mappings:
+  - { proto: tcp, port: 2022, destip: "{{lan_prefix}}.2", destport: 22 }
+  - { proto: tcp, port: 1194, destip: "{{lan_prefix}}.2", destport: 1194 }
+
 
 # settings for OpenSSH daemon
 sshd_options:
