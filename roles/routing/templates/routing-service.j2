@@ -20,9 +20,9 @@ case "$1" in
       {% for pm in port_mappings %}
         {# Destination IP+port rewriting for incoming packets. #}
         {# The corresponding source address rewriting (to {{outgoing_interface}}'s IP) for the outgoing packets is set up by the POSTROUTING rule above. See also https://www.netfilter.org/documentation/HOWTO/NAT-HOWTO-6.html#ss6.1 / Masquerading #}
-        $IPTABLES -t nat -A PREROUTING -p tcp --dport {{pm.port}} -i {{outgoing_interface}} -j DNAT --to {{pm.destip}}:{{pm.destport}}
+        $IPTABLES -t nat -A PREROUTING -p {{pm.proto}} --dport {{pm.port}} -i {{outgoing_interface}} -j DNAT --to {{pm.destip}}:{{pm.destport}}
         {# Let the incoming packets through the FORWARD chain. Needed because the default policy of the FORWARD chain is DROP, which is a good idea #}
-        $IPTABLES -t filter -A FORWARD -i {{outgoing_interface}} -p tcp --destination {{pm.destip}} -m tcp --destination-port {{pm.destport}} -j ACCEPT
+        $IPTABLES -t filter -A FORWARD -i {{outgoing_interface}} -p {{pm.proto}} --destination {{pm.destip}} -m {{pm.proto}} --destination-port {{pm.destport}} -j ACCEPT
       {% endfor %}
         
         ;;
@@ -33,8 +33,8 @@ case "$1" in
         $IPTABLES -t filter -D FORWARD -i {{outgoing_interface}} -o {{lanif_name}} -m state --state 'ESTABLISHED,RELATED' -j ACCEPT
 
       {% for pm in port_mappings %}
-        $IPTABLES -t nat -D PREROUTING -p tcp --dport {{pm.port}} -i {{outgoing_interface}} -j DNAT --to {{pm.destip}}:{{pm.destport}}
-        $IPTABLES -t filter -D FORWARD -i {{outgoing_interface}} -p tcp --destination {{pm.destip}} -m tcp --destination-port {{pm.destport}} -j ACCEPT
+        $IPTABLES -t nat -D PREROUTING -p {{pm.proto}} --dport {{pm.port}} -i {{outgoing_interface}} -j DNAT --to {{pm.destip}}:{{pm.destport}}
+        $IPTABLES -t filter -D FORWARD -i {{outgoing_interface}} -p {{pm.proto}} --destination {{pm.destip}} -m {{pm.proto}} --destination-port {{pm.destport}} -j ACCEPT
       {% endfor %}
 
         echo 0 >/proc/sys/net/ipv4/ip_forward
