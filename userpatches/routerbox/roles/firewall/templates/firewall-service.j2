@@ -40,16 +40,7 @@ $IPTABLES -t filter -P OUTPUT ACCEPT
 
 clear
 
-### vom Loopback-Interface eingehende Pakete durchlassen
-### (bessere Performance durch "short-cut"; nachfolgende Regeln
-### werden nicht mehr getestet -- richtig?)
-$IPTABLES -t filter -A INPUT -i lo -j ACCEPT
-
-### vom LAN-Interface eingehende Pakete durchlassen
-$IPTABLES -t filter -A INPUT -i {{lanif_name}} -j ACCEPT
-
-
-### ueber outgoing_interface eingehende Pakete:
+### ueber {{outgoing_interface}} eingehende Pakete:
 
 # neue Chain fuer zu droppende Pakete
 $IPTABLES -t filter -N DROPPED
@@ -59,13 +50,12 @@ $IPTABLES -t filter -N DROPPED
 $IPTABLES -t filter -A DROPPED -j LOG
 $IPTABLES -t filter -A DROPPED -j REJECT
 
-
 # ssh durchlassen (mit logging)
 # TODO: configurable via Ansible
 $IPTABLES -t filter -A INPUT -i {{outgoing_interface}} -p tcp -m tcp --destination-port 22 -j LOG --log-prefix "+++ incoming {{outgoing_interface}}/22/tcp" --log-ip-options --log-tcp-options
 $IPTABLES -t filter -A INPUT -i {{outgoing_interface}} -p tcp -m tcp --destination-port 22 -j ACCEPT
 
-# privilegierte Ports droppen
+# drop other privileged ports
 $IPTABLES -t filter -A INPUT -i {{outgoing_interface}} -p tcp --destination-port 0:1024 -j DROPPED
 
 ### Rest durchlassen (Default-Policy)
@@ -79,10 +69,10 @@ $IPTABLES -t filter -P INPUT ACCEPT
 
   stop)
         echo -n "Stoppe Firewalling"
-$IPTABLES -t filter -P INPUT ACCEPT
-$IPTABLES -t filter -P OUTPUT ACCEPT
 
-clear
+        $IPTABLES -t filter -P INPUT ACCEPT
+        $IPTABLES -t filter -P OUTPUT ACCEPT
+        clear
 
         echo
         rm -f /var/lock/subsys/myfirewall
