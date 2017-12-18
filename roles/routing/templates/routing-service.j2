@@ -27,7 +27,6 @@ case "$1" in
         $IPTABLES -t nat -A POSTROUTING -o {{outgoing_interface}} -j MASQUERADE
         # forward any outgoing packets, as well as any incoming packets belonging to an existing connection
         $IPTABLES -t filter -P FORWARD DROP
-        $IPTABLES -t filter -A FORWARD -i {{lanif_name}} -o {{lanif_name}} -j ACCEPT
         $IPTABLES -t filter -A FORWARD -i {{lanif_name}} -o {{outgoing_interface}} -j ACCEPT
         $IPTABLES -t filter -A FORWARD -i {{outgoing_interface}} -o {{lanif_name}}  -m state --state 'ESTABLISHED,RELATED' -j ACCEPT
 
