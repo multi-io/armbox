@@ -14,6 +14,13 @@ logged_iptables() {
   echo "executing: iptables $@" && /sbin/iptables "$@"
 }
 
+clear() {
+    $IPTABLES -t filter -F INPUT
+    $IPTABLES -t filter -F OUTPUT
+    $IPTABLES -t filter -F DROPPED
+    $IPTABLES -t filter -X DROPPED
+}
+
 #IPTABLES=/sbin/iptables
 IPTABLES="execlogged /sbin/iptables"
 #IPTABLES=logged_iptables
@@ -31,10 +38,7 @@ case "$1" in
 $IPTABLES -t filter -P INPUT DROP
 $IPTABLES -t filter -P OUTPUT ACCEPT
 
-# eventuell bestehende Restkonfiguration loeschen
-$IPTABLES -t filter -F INPUT
-$IPTABLES -t filter -F OUTPUT
-$IPTABLES -t filter -X DROPPED
+clear
 
 ### vom Loopback-Interface eingehende Pakete durchlassen
 ### (bessere Performance durch "short-cut"; nachfolgende Regeln
@@ -78,9 +82,7 @@ $IPTABLES -t filter -P INPUT ACCEPT
 $IPTABLES -t filter -P INPUT ACCEPT
 $IPTABLES -t filter -P OUTPUT ACCEPT
 
-$IPTABLES -t filter -F INPUT
-$IPTABLES -t filter -F OUTPUT
-$IPTABLES -t filter -X DROPPED
+clear
 
         echo
         rm -f /var/lock/subsys/myfirewall
