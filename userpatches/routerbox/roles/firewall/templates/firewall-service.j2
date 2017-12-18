@@ -2,6 +2,9 @@
 
 # set -e
 
+# Sets up rules for packets originating or ending up on this box, i.e. the OUTPUT and INPUT chains
+# TODO maybe it makes more sense to unify this with the routing-service again
+
 execlogged() {
   echo "executing: $@" && "$@"
 
@@ -20,15 +23,17 @@ case "$1" in
   start)
         echo "Starting Firewalling"
 
+# TODO move basic INPUT and OUTPUT chain handling to routing-service too
+        
 # auf diesem Rechner erzeugte Pakete durchlassen,
-#  eingehende und geforwardete zunaechst droppen, bis genaue
+#  eingehende zunaechst droppen, bis genaue
 #  Konfiguration unten programmiert ist
 $IPTABLES -t filter -P INPUT DROP
 $IPTABLES -t filter -P OUTPUT ACCEPT
-$IPTABLES -t filter -P FORWARD DROP
 
 # eventuell bestehende Restkonfiguration loeschen
-$IPTABLES -t filter -F
+$IPTABLES -t filter -F INPUT
+$IPTABLES -t filter -F OUTPUT
 $IPTABLES -t filter -X DROPPED
 
 ### vom Loopback-Interface eingehende Pakete durchlassen
@@ -50,40 +55,19 @@ $IPTABLES -t filter -N DROPPED
 $IPTABLES -t filter -A DROPPED -j LOG
 $IPTABLES -t filter -A DROPPED -j REJECT
 
-# LAN und loopback durchlassen
-$IPTABLES -t filter -A FORWARD -i {{lanif_name}} -o {{lanif_name}} -j ACCEPT
-$IPTABLES -t filter -A FORWARD -i lo -j ACCEPT
-
-# WAN-Interfaces Konfiguration
-
-# geroutete Pakete: nur von innen nach aussen und zugehorige von
-# aussen nach innen durchlassen.
-# => ueber outgoing_interface eingehende Pakete, die ins LAN geroutet wuerden,
-# werden per Default-Policy gedroppt
-# (fuer den Fall, dass es jmd. schafft, solche Pakete zu erzeugen)
-$IPTABLES -t filter -A FORWARD -i {{lanif_name}} -o {{outgoing_interface}} -j ACCEPT
-
-# X11, http-proxy, approx, nfsd,  droppen
-$IPTABLES -t filter -A INPUT -i {{outgoing_interface}} -p tcp --destination-port 5900:6100 -j DROPPED
-$IPTABLES -t filter -A INPUT -i {{outgoing_interface}} -p tcp -m multiport --destination-ports 8080,8081,9999,2049,$RPC_MOUNTD_PORT,$RPC_STATD_PORT,$RPC_STATD_OUTPORT -j DROPPED
-$IPTABLES -t filter -A INPUT -i {{outgoing_interface}} -p udp -m multiport --destination-ports 2049,$RPC_MOUNTD_PORT,$RPC_STATD_PORT,$RPC_STATD_OUTPORT -j DROPPED
-
 
 # ssh durchlassen (mit logging)
+# TODO: configurable via Ansible
 $IPTABLES -t filter -A INPUT -i {{outgoing_interface}} -p tcp -m tcp --destination-port 22 -j LOG --log-prefix "+++ incoming {{outgoing_interface}}/22/tcp" --log-ip-options --log-tcp-options
 $IPTABLES -t filter -A INPUT -i {{outgoing_interface}} -p tcp -m tcp --destination-port 22 -j ACCEPT
 
 # privilegierte Ports droppen
 $IPTABLES -t filter -A INPUT -i {{outgoing_interface}} -p tcp --destination-port 0:1024 -j DROPPED
 
-
-
-### Rest (i.e. unpriv. Ports != X11,http-proxy) durchlassen (Default-Policy)
+### Rest durchlassen (Default-Policy)
 
 $IPTABLES -t filter -P INPUT ACCEPT
 
-
-#        /etc/rc.d/init.d/permit-ssh-logins
 
         touch /var/lock/subsys/myfirewall
         ;;
@@ -93,9 +77,9 @@ $IPTABLES -t filter -P INPUT ACCEPT
         echo -n "Stoppe Firewalling"
 $IPTABLES -t filter -P INPUT ACCEPT
 $IPTABLES -t filter -P OUTPUT ACCEPT
-$IPTABLES -t filter -P FORWARD ACCEPT
 
-$IPTABLES -t filter -F
+$IPTABLES -t filter -F INPUT
+$IPTABLES -t filter -F OUTPUT
 $IPTABLES -t filter -X DROPPED
 
         echo
