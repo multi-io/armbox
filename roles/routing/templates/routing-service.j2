@@ -4,6 +4,12 @@ set -e
 
 IPTABLES=/sbin/iptables
 
+clear() {
+    $IPTABLES -t filter -F FORWARD
+    $IPTABLES -t nat -F PREROUTING
+    $IPTABLES -t nat -F POSTROUTING
+}
+
 # IP routing config. Sets up rules for routed packets (FORWARD chain, i.e. packets routed through the box, rather than originating or ending up on it)
 
 # See how we were called.
@@ -14,6 +20,8 @@ case "$1" in
         echo 1 >/proc/sys/net/ipv4/ip_forward
         echo 1 >/proc/sys/net/ipv6/conf/all/forwarding
         modprobe ipt_MASQUERADE
+
+        clear
 
         # NAT/Masquerading for packets going into the internet
         $IPTABLES -t nat -A POSTROUTING -o {{outgoing_interface}} -j MASQUERADE
@@ -35,16 +43,8 @@ case "$1" in
 
   stop)
         echo -n "Stopping routing"
-        $IPTABLES -t nat -D POSTROUTING -o {{outgoing_interface}} -j MASQUERADE
 
-        $IPTABLES -t filter -D FORWARD -i {{lanif_name}} -o {{lanif_name}} -j ACCEPT
-        $IPTABLES -t filter -D FORWARD -i {{lanif_name}} -o {{outgoing_interface}} -j ACCEPT
-        $IPTABLES -t filter -D FORWARD -i {{outgoing_interface}} -o {{lanif_name}} -m state --state 'ESTABLISHED,RELATED' -j ACCEPT
-
-      {% for pm in port_mappings %}
-        $IPTABLES -t nat -D PREROUTING -p {{pm.proto}} --dport {{pm.port}} -i {{outgoing_interface}} -j DNAT --to {{pm.destip}}:{{pm.destport}}
-        $IPTABLES -t filter -D FORWARD -i {{outgoing_interface}} -p {{pm.proto}} --destination {{pm.destip}} -m {{pm.proto}} --destination-port {{pm.destport}} -j ACCEPT
-      {% endfor %}
+        clear
 
         echo 0 >/proc/sys/net/ipv4/ip_forward
         echo 0 >/proc/sys/net/ipv6/conf/all/forwarding
