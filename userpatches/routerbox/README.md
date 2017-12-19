@@ -2,7 +2,7 @@
 
 This is an Ansible playbook for setting up a simple ADSL home router.
 
-Primarily used for in https://github.com/multi-io/routerbox for now,
+Primarily used for in https://github.com/multi-io/armbox for now,
 but can be used to set up other machines, including non-ARM ones.
 
 Supports basic network configuration, WiFi access point setup,
@@ -12,7 +12,7 @@ client setup.
 
 Some roles are tailored to the Lamobo R1 right now (this concerns
 network interface names primarily), but can be used as a basis for
-setting up other machines.
+setting up other kinds of machines.
 
 
 TODOs
