@@ -8,6 +8,13 @@ lan_prefix: 192.168.143
 # name of the (bridge) interface to create to access the LAN
 lanif_name: lanif
 
+# whether to tag ethernet frames going out the wan (pppoe) interface
+wanif_untagged: false
+
+# if wanif_untagged is false: VLAN ID of the WAN (ppp) interface.
+# Must not be 1 or 3, as those are for now fixed for the LAN and mgmt interface, respectively (TODO)
+wanif_vid: 7
+
 # IP address of management interface, if any.
 # Must be outside lan_prefix.
 management_ip: 192.168.112.1
