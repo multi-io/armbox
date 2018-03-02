@@ -94,7 +94,7 @@ start)
 
     # physical switch eth0, consisting of 5 physical ports lan1...lan4, wan
     # despite the "lan" vs. "wan" naming, they're all equivalent after bootup and
-    # operate as a switche initially (until the kernel boots and disables this).
+    # operate as a switch initially (until the kernel boots and disables this).
     # we'll use "wan" for the outgoing (WAN) port and lan1..4 for the LAN-facing ports
     brctl addbr physical_switch
     brctl addif physical_switch lan1
@@ -104,19 +104,19 @@ start)
     brctl addif physical_switch wan
 
     # VLAN 1 = LAN
-    # VLAN 2 = WAN
+    # VLAN {{wanif_vid}} = WAN
     # VLAN 3 = management access
     #
     # 1 is the default vid (VLAN ID), all interfaces belong to it initially
     # (see "bridge vlan show" after a clean reboot and brctl addbr+addif sequence).
-    # Hence only vid 2 and 3 must be added to an interface explicitly. vid 1 must be REMOVED explicitly.
+    # Hence only vid {{wanif_vid}} and 3 must be added to an interface explicitly. vid 1 must be REMOVED explicitly.
     # So we use vid 1 for the VLAN of all the local ports (i.e. all but the "wan" and "lan4" port),
-    # vid 2 for the VLAN of the wan port, vid 3 for the management port (i.e the "lan4" port -- physically opposite of the wan port).
+    # vid {{wanif_vid}} for the VLAN of the wan port, vid 3 for the management port (i.e the "lan4" port -- physically opposite of the wan port).
     ip link add link eth0 name eth0.1 type vlan id 1
-    ip link add link eth0 name eth0.2 type vlan id 2
+    ip link add link eth0 name eth0.2 type vlan id {{wanif_vid}}
     ip link add link eth0 name eth0.3 type vlan id 3
 
-    bridge vlan add vid 2 dev wan pvid untagged
+    bridge vlan add vid {{wanif_vid}} dev wan pvid {% if wanif_untagged %}untagged{% endif %} 
     bridge vlan del vid 1 dev wan
 
     bridge vlan add vid 3 dev lan4 pvid untagged
