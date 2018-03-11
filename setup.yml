@@ -15,6 +15,7 @@
     - { role: wifi-firmwares, tags: ['firmwares'] }
     - { role: network-interfaces, tags: ['ifaces'] }
     - { role: accesspoint, tags: ['ap'] }
+    - { role: monitoring, tags: ['monitoring'] }
     - { role: dns, tags: ['dns'] }
     - { role: firewall, tags: ['firewall'] }
     - { role: routing, tags: ['routing'] }

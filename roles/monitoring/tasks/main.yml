@@ -1,0 +1,13 @@
+- name: upload Prometheus Node Exporter settings
+  copy:
+    src: files/prometheus-node-exporter
+    dest: /etc/default/prometheus-node-exporter
+    mode: 0644
+  notify: restart node-exporter service
+
+- name: install Prometheus Node Exporter
+  package:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - prometheus-node-exporter
