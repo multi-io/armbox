@@ -1,6 +1,6 @@
 - name: upload Prometheus Node Exporter settings
-  copy:
-    src: files/prometheus-node-exporter
+  template:
+    src: templates/prometheus-node-exporter
     dest: /etc/default/prometheus-node-exporter
     mode: 0644
   notify: restart node-exporter service

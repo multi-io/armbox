@@ -1,7 +1,8 @@
 # Set the command-line arguments to pass to the server.
 ARGS="-collector.diskstats.ignored-devices=^(ram|loop|fd)\d+$ \
       -collector.filesystem.ignored-mount-points=^/(sys|proc|dev|run)($|/) \
-      -collector.textfile.directory=/var/lib/prometheus/node-exporter"
+      -collector.textfile.directory=/var/lib/prometheus/node-exporter \
+      -web.listen-address {{lan_prefix}}.1:9100"
 
 # Prometheus-node-exporter supports the following options:
 #
