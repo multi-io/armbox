@@ -17,6 +17,8 @@ setting up other kinds of machines.
 
 TODOs
 
+- per-board default variable presets
+
 - port mappings: UDP support
 
   - probably(?) can't be done via masquerading, must use separate
@@ -32,8 +34,6 @@ TODOs
 
 - /var/log no space left on device
 
-- configurable port forwardings
-
 - clean up systemd network target dependencies of services
 
 - user setup:
@@ -45,5 +45,3 @@ TODOs
 - assignment of physical ethernet ports to networks (wan/lan/mgmt) configurable
 
 - service executables in /usr/local/sbin
-
-- Prometheus monitoring

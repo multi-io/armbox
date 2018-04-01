@@ -5,8 +5,14 @@ root_password: 'EcElchyeib'
 # must be a /24
 lan_prefix: 192.168.143
 
+# IP (host part, under lan_prefix) of this machine.
+# Complete IP will be {{lan_prefix}}.{{lan_host}}
+lan_host: 1
+
 # name of the (bridge) interface to create to access the LAN
 lanif_name: lanif
+
+physical_switch_vlans:
 
 # whether to tag ethernet frames going out the wan (pppoe) interface
 wanif_untagged: false
