@@ -9,19 +9,53 @@ authorized_keys:
 # must be a /24
 lan_prefix: 192.168.100
 
+# IP (host part, under lan_prefix) of this machine.
+# Complete IP will be {{lan_prefix}}.{{lan_host}}
+lan_host: 1
+
 # name of the (bridge) interface to create to access the LAN
 lanif_name: lanif
 
-# whether to tag ethernet frames going out the wan (pppoe) interface
-wanif_untagged: false
+# if the box contains physical switch interfaces with physical constituent interfaces (ports),
+# this can be used to partition them into subgroups (VLANs) and set up a new interface for each group.
+# If the box contains no such physical switches, just leave this variable empty.
+physical_switch_vlans:
+  eth0:
+    - ifname: vlan_lan
+      vid: 1
+      ports:
+        - name: lan1
+        - name: lan2
+        - name: lan3
+    - ifname: vlan_mgmt
+      vid: 3
+      ports:
+        - name: lan4
+    - ifname: vlan_wan
+      vid: 7
+      ports:
+        - name: wan
+          tagged: true
 
-# if wanif_untagged is false: VLAN ID of the WAN (ppp) interface.
-# Must not be 1 or 3, as those are for now fixed for the LAN and mgmt interface, respectively (TODO)
-wanif_vid: 7
+# Which interfaces to combine into which bridge interfaces (software switches),
+# with which IPs.
+# One of them must be the LAN interface, named {{lanif_name}}, IP {{lan_prefix}}.{{lan_host}}.
+bridges:
+  - name: "{{lanif_name}}"
+    members: [vlan_lan]
+    ip: "{{lan_prefix}}.{{lan_host}}"
+    ipv6_mtu: 1400  # for IPv6 only (does this really work?)
+  - name: mgmt
+    members: [vlan_mgmt]
+    ip: 192.168.200.1
 
-# IP address of management interface, if any.
-# Must be outside lan_prefix.
-management_ip: 192.168.200.1
+
+# WAN interface. The ADSL setup will configure this to be the PPPoE outgoing interface
+wan_interface: vlan_wan
+
+
+# WLAN interface. Will be added to the {{lanif_name}} bridge interface
+wlan_interface: wlan1
 
 # local host's name
 local_hostname: myrouter

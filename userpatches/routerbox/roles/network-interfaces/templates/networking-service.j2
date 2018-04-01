@@ -89,65 +89,54 @@ start)
 
     ip_forward
 
-    ## physical switch configuration. Relies on DSA-capable driver for the switch,
-    ## which means switch configuration works via the standard br* tools
+    {% for sw_iface, vlans in physical_switch_vlans.items() %}
 
-    # physical switch eth0, consisting of 5 physical ports lan1...lan4, wan
-    # despite the "lan" vs. "wan" naming, they're all equivalent after bootup and
-    # operate as a switch initially (until the kernel boots and disables this).
-    # we'll use "wan" for the outgoing (WAN) port and lan1..4 for the LAN-facing ports
-    brctl addbr physical_switch
-    brctl addif physical_switch lan1
-    brctl addif physical_switch lan2
-    brctl addif physical_switch lan3
-    brctl addif physical_switch lan4
-    brctl addif physical_switch wan
+    brctl addbr physical_switch_{{sw_iface}}
+    
+      {% for vlan in vlans %}
 
-    # VLAN 1 = LAN
-    # VLAN {{wanif_vid}} = WAN
-    # VLAN 3 = management access
-    #
-    # 1 is the default vid (VLAN ID), all interfaces belong to it initially
-    # (see "bridge vlan show" after a clean reboot and brctl addbr+addif sequence).
-    # Hence only vid {{wanif_vid}} and 3 must be added to an interface explicitly. vid 1 must be REMOVED explicitly.
-    # So we use vid 1 for the VLAN of all the local ports (i.e. all but the "wan" and "lan4" port),
-    # vid {{wanif_vid}} for the VLAN of the wan port, vid 3 for the management port (i.e the "lan4" port -- physically opposite of the wan port).
-    ip link add link eth0 name eth0.1 type vlan id 1
-    ip link add link eth0 name eth0.2 type vlan id {{wanif_vid}}
-    ip link add link eth0 name eth0.3 type vlan id 3
+    ip link add link {{sw_iface}} name {{vlan.ifname}} type vlan id {{vlan.vid}}
+      
+        {% for port in vlan.ports %}
 
-    bridge vlan add vid {{wanif_vid}} dev wan pvid {% if wanif_untagged %}untagged{% endif %} 
-    bridge vlan del vid 1 dev wan
+    brctl addif physical_switch_{{sw_iface}} {{port.name}}
+        
+    bridge vlan del vid 1 dev {{port.name}}
+    bridge vlan add vid {{vlan.vid}} dev {{port.name}} pvid {% if not(port.tagged | default(false)) %}untagged{% endif %}
 
-    bridge vlan add vid 3 dev lan4 pvid untagged
-    bridge vlan del vid 1 dev lan4
+    ip link set {{port.name}} up
+    
+        {% endfor %}
 
-    ip link set wan up
-    ip link set lan1 up
-    ip link set lan2 up
-    ip link set lan3 up
-    ip link set lan4 up
+    ip link set {{vlan.ifname}} up
+        
+      {% endfor %}
+    {% endfor %}
 
-    ip link set eth0.2 up
-    ip link set eth0.1 up
 
     ## setup software switch for the local LAN
 
-    brctl addbr {{lanif_name}}
-    brctl addif {{lanif_name}} eth0.1
+    {% for bridge in bridges %}
+
+    brctl addbr {{bridge.name}}
+      {% for member in bridge.members %}
+    
+    brctl addif {{bridge.name}} {{member}}
+
+      {% endfor %}
+
+    ip addr add {{bridge.ip}}/24 dev {{bridge.name}}
+    ip link set {{bridge.name}} up
+
+      {% if bridge.ipv6_mtu is defined %}
+    echo {{bridge.ipv6_mtu}} >/proc/sys/net/ipv6/conf/{{bridge.name}}/mtu
+      {% endif %}
+
+    {% endfor %}
+    
     # with newer kernels, adding wlan ifaces in STA mode isn't supported anymore.
     #  hostapd is told about the bridge device and will add the wlan iface to it
     # brctl addif {{lanif_name}} wlan0
-
-    # LAN IP
-    ip addr add {{lan_prefix}}.1/24 dev {{lanif_name}}
-    ip link set {{lanif_name}} up
-    #ip -6 link set {{lanif_name}} mtu 1400  # for better IPv6 compatibility...  # distributed via radvd.conf to LAN hosts
-    echo 1400 >/proc/sys/net/ipv6/conf/{{lanif_name}}/mtu  # for IPv6 only (does this really work?)
-
-    # management IP
-    ip addr add {{management_ip}}/24 dev eth0.3
-    ip link set eth0.3 up
 
     log_action_end_msg $?
 
@@ -162,22 +151,41 @@ stop)
     fi
 
     log_action_begin_msg "Deconfiguring network interfaces"
-    ip addr flush dev {{lanif_name}}
-    brctl delif {{lanif_name}} eth0.1
-#   brctl delif {{lanif_name}} wlan0
-    ip link set {{lanif_name}} down
-    brctl delbr {{lanif_name}}
 
-    ip link delete link dev eth0.1
-    ip link delete link dev eth0.2
-    ip link delete link dev eth0.3
-    brctl delbr physical_switch
-    ip link set wan down
-    ip link set lan1 down
-    ip link set lan2 down
-    ip link set lan3 down
-    ip link set lan4 down
+    {% for bridge in bridges %}
 
+    ip addr flush dev {{bridge.name}}
+
+      {% for member in bridge.members %}
+    
+    brctl delif {{bridge.name}} {{member}}
+
+      {% endfor %}
+
+    ip link set {{bridge.name}} down
+    brctl delbr {{bridge.name}}
+      
+    {% endfor %}
+
+    
+
+    {% for sw_iface, vlans in physical_switch_vlans.items() %}
+      {% for vlan in vlans %}
+
+    ip link delete link dev {{vlan.ifname}}
+      
+        {% for port in vlan.ports %}
+
+    ip link set {{port.name}} down
+    
+        {% endfor %}
+
+      {% endfor %}
+
+    brctl delbr physical_switch_{{sw_iface}}
+      
+    {% endfor %}
+    
     #ifupdown lo down
     ;;
 
