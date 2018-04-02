@@ -12,7 +12,8 @@
     - { role: disable-deb-init-actions, tags: ['debinitactions'] }
     - { role: sshd-config, tags: ['sshdconfig'] }
     - { role: rootuser-setup, tags: ['rootuser'] }
-    - { role: wifi-firmwares, tags: ['firmwares'] }
+    - { role: install-additional-packages, tags: ['packages'] }
+    - { role: disable-kernel-modules, tags: ['disable-modules'] }
     - { role: network-interfaces, tags: ['ifaces'] }
     - { role: accesspoint, tags: ['ap'] }
     - { role: monitoring, tags: ['monitoring'] }
