@@ -1,0 +1,7 @@
+- name: disable kernel modules
+  lineinfile:
+    path: /etc/modprobe.d/blacklist.conf
+    line: "blacklist {{item}}"
+    create: yes
+  with_items:
+    - "{{disabled_kernel_modules}}"

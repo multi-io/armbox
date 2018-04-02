@@ -1,0 +1,6 @@
+- name: install additional packages
+  package:
+    name: "{{item}}"
+    state: present
+  with_items:
+    - "{{additional_packages}}"

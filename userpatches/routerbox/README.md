@@ -17,7 +17,23 @@ setting up other kinds of machines.
 
 TODOs
 
-- per-board default variable presets
+- variables refactoring:
+
+  - variables/pre/*yml
+  - variables/board/$BOARD.yml
+  - variables/post/*yml
+
+  The pre and post directories each contain a 10-defaults.yml for
+  pre-defined settings, the user may add other *yml files. All *.yml
+  files in a diretory will be executed in alphabetical order (via
+  include_vars). We first run everything in pre/, the
+  board/$BOARD.yml, then everythin in post.
+
+  pre/ would usually contain board-independent settings like hostname,
+  ssh keys, public IP address etc. $BOARD.yml would contain
+  board-specific variable settings, e.g. switchports, and is free to
+  use variables from pre/. post/ will contain variables thay may be
+  set to override board default settings.
 
 - port mappings: UDP support
 

@@ -5,6 +5,18 @@ authorized_keys:
   - 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQDVho9lnXa..... olaf@tackd'
   - 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQDWd8tYrRP..... oklischat@Olafs-MacBook-Air.local'
 
+# disable some kernel modules
+disabled_kernel_modules:
+  - rtl8192cu
+  - rtl_usb
+  - rtl8192c_common
+  - rtlwifi
+
+# install some additional Debian packages
+additional_packages:
+  - firmware-atheros
+  - firmware-ralink
+
 # /24 network in which to assign the LAN IPs.
 # must be a /24
 lan_prefix: 192.168.100
