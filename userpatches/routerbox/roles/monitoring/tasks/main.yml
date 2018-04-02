@@ -1,6 +1,6 @@
 - name: upload Prometheus Node Exporter settings
   template:
-    src: templates/prometheus-node-exporter
+    src: templates/prometheus-node-exporter.j2
     dest: /etc/default/prometheus-node-exporter
     mode: 0644
   notify: restart node-exporter service
@@ -11,3 +11,11 @@
     state: present
   with_items:
     - prometheus-node-exporter
+
+- name: enable and start Prometheus Node Exporter service
+  systemd:
+    name: prometheus-node-exporter.service
+    enabled: True
+    state: started
+    daemon_reload: True
+    detect_early_failure: yes

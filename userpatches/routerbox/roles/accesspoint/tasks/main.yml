@@ -35,4 +35,3 @@
     state: started
     daemon_reload: True
     detect_early_failure: yes
-  notify: restart hostapd service

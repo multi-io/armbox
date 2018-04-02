@@ -19,4 +19,3 @@
     name: routing.service
     enabled: True
     daemon_reload: True
-  notify: restart routing service

@@ -16,6 +16,7 @@
   copy:
     content: "{{local_hostname}}"
     dest: /etc/hostname
+  notify: restart dnsmasq service
 
 - name: set host name (session)
   command: "/bin/hostname {{local_hostname}}"
@@ -29,6 +30,7 @@
     - "{{lan_prefix}}.1   {{local_hostname}}.{{local_domainname}}"
     - "{{dns_static_mappings}}"
     # TODO replace existing lines w/ the same hostname
+  notify: restart dnsmasq service
 
 - name: enable and start dnsmasq service
   systemd:
@@ -37,4 +39,3 @@
     state: started
     daemon_reload: True
     detect_early_failure: yes
-  notify: restart dnsmasq service
