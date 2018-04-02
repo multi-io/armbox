@@ -31,4 +31,3 @@
     name: adslconnection.service
     enabled: True
     daemon_reload: True
-  notify: restart ADSL connection

@@ -35,4 +35,3 @@
     name: dyndns-publish.service
     enabled: True
     daemon_reload: True
-  notify: restart dyndns-publish service
