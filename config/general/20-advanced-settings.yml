@@ -1,0 +1,12 @@
+# name of the (bridge) interface to create to access the LAN
+lanif_name: lanif
+
+# name of the manegement interface to create
+mgmtif_name: mgmt
+
+physical_switch_vlans:
+
+# settings for OpenSSH daemon
+sshd_options:
+  - ['PasswordAuthentication', 'no']
+  - ['PermitRootLogin', 'yes']  # needed by the default make setup-running-machine

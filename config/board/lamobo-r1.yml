@@ -1,0 +1,56 @@
+# disable built-in WiFi because it is terrible
+disabled_kernel_modules:
+  - rtl8192cu
+  - rtl_usb
+  - rtl8192c_common
+  - rtlwifi
+
+# use USB WiFi dongle instead
+additional_packages:
+  - firmware-atheros
+  - firmware-ralink
+
+
+# physical switch eth0, consisting of 5 physical ports lan1...lan4, wan
+# despite the "lan" vs. "wan" naming, they're all equivalent after bootup and
+# operate as a switch initially (until the kernel boots and disables this).
+# we'll use "wan" for the outgoing (WAN) port and lan1..4 for the LAN-facing ports
+# (lan1..3 for the regular LAN, lan4 for management access)
+# VLAN 1 = LAN
+# VLAN 7 = WAN
+# VLAN 3 = management access
+physical_switch_vlans:
+  eth0:
+    - ifname: vlan_lan
+      vid: 1
+      ports:
+        - name: lan1
+        - name: lan2
+        - name: lan3
+    - ifname: vlan_mgmt
+      vid: 3
+      ports:
+        - name: lan4
+    - ifname: vlan_wan
+      vid: 7
+      ports:
+        - name: wan
+          tagged: true
+
+# Which interfaces to combine into which bridge interfaces (software switches),
+# with which IPs.
+# One of them must be the LAN interface, named {{lanif_name}}, IP {{lan_prefix}}.{{lan_host}}.
+bridges:
+  - name: "{{lanif_name}}"
+    members: [vlan_lan]
+    ip: "{{lan_prefix}}.{{lan_host}}"
+    ipv6_mtu: 1400  # for IPv6 only (does this really work?)
+  - name: "{{mgmtif_name}}"
+    members: [vlan_mgmt]
+    ip: "{{management_ip}}"
+
+# WAN interface. The ADSL setup will configure this to be the PPPoE outgoing interface
+wan_interface: vlan_wan
+
+# WLAN interface. Will be added to the {{lanif_name}} bridge interface
+wlan_interface: wlan1
