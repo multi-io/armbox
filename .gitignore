@@ -23,3 +23,7 @@ cache
 \#*
 .\#*
 *.retry
+
+### Armbox
+/env.make
+99-*.yml

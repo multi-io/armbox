@@ -1,0 +1,63 @@
+# CHANGE THIS
+root_password: 'EcElchyeib'
+
+# /24 network in which to assign the LAN IPs.
+# must be a /24
+lan_prefix: 192.168.143
+
+# IP (host part, under lan_prefix) of this machine.
+# Complete IP will be {{lan_prefix}}.{{lan_host}}
+lan_host: 1
+
+# IP address of management interface, if any.
+# Must be outside lan_prefix.
+management_ip: 192.168.112.1
+
+# whether to tag ethernet frames going out the wan (pppoe) interface
+wanif_untagged: false
+
+# if wanif_untagged is false: VLAN ID of the WAN (ppp) interface.
+# Must not be 1 or 3, as those are for now fixed for the LAN and mgmt interface, respectively (TODO)
+wanif_vid: 7
+
+# local host's name
+local_hostname: myrouter
+
+# local domain name
+local_domainname: home.mylocal
+
+
+wlan_wpa_passphrase: 'supergeheim'
+
+wlan_channel: 6
+
+# MAC address: IP (host part, in lan_prefix)
+dhcp_static_mappings:
+  'd0:33:33:33:33:33': '2'   # desktop
+  '68:44:55:66:77:88': '7'   # mobile
+  '00:0B:00:11:22:33': '8'   # SIP phone
+  '00:0B:44:55:66:77': '17'  # file server
+  '00:0B:88:99:aa:bb': '18'  # web server
+
+# "IP    name"
+dns_static_mappings:
+  - "{{lan_prefix}}.2   desktop"
+  - "{{lan_prefix}}.2   desktop.{{local_domainname}}"
+  - "{{lan_prefix}}.17   files"
+  - "{{lan_prefix}}.17   files.{{local_domainname}}"
+  - "{{lan_prefix}}.18   www"
+  - "{{lan_prefix}}.18   www.{{local_domainname}}"
+
+port_mappings:
+  - { proto: tcp, port: 2022, destip: "{{lan_prefix}}.2", destport: 22 }
+  - { proto: udp, port: 80, destip: "{{lan_prefix}}.18", destport: 80 }
+
+# ADSL setup
+adsl_user: 08922838492@s92.bbi-o2.de
+adsl_password: d93kt9skrd
+
+# DynDNS setup
+dyndns_proto: 'freedns'
+dyndns_login: 'oklischat'
+dyndns_password: 'somepassword'
+dyndns_hostname: 'mybox.mooo.com'

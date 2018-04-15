@@ -1,9 +1,11 @@
-- name: include override vars
+- name: include variables
   hosts: all
   gather_facts: no
   tags: always
   tasks:
-    - include_vars: dir='vars_override' files_matching='.yml$'
+    - include_vars: dir='config/general' files_matching='.yml$'
+    - include_vars: dir='config/board' files_matching='{{board}}.yml$'
+    - include_vars: dir='config/postproc' files_matching='.yml$'
 
 - name: router setup
   hosts: all
