@@ -2,3 +2,4 @@
   systemd:
     name: adslconnection.service
     state: restarted
+    daemon_reload: True

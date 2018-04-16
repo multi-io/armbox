@@ -1,8 +1,7 @@
 [Unit]
 Description=DynDNS IP publishing
-Wants=network.target
-Before=network.target multi-user.target shutdown.target
-After=networking.service
+Before=multi-user.target shutdown.target
+After=network.target
 Conflicts=shutdown.target
 
 [Service]

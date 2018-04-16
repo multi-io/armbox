@@ -51,6 +51,8 @@ to re-provision the already running machine.
 
 - IPv6
 
+- STUN
+
 - /var not on SD card
 
 - /var/log no space left on device
@@ -59,7 +61,9 @@ to re-provision the already running machine.
 
 - avoid stateful wlan interface naming (udev)
 
-- clean up systemd network target dependencies of services
+- fix apparent race: networking-service[514]: RTNETLINK answers: Network is down
+
+- remove unneeded services, verify wants vs. requires in various networking services
 
 - user setup:
 

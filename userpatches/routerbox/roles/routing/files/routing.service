@@ -1,8 +1,8 @@
 [Unit]
 Description=Set Up Routing
-Wants=network.target
-Before=network.target multi-user.target shutdown.target
-After=dbus.service network-pre.target systemd-sysusers.service
+Before=multi-user.target shutdown.target
+After=dbus.service networking.service systemd-sysusers.service
+Requires=networking.service
 Conflicts=shutdown.target
 
 [Service]

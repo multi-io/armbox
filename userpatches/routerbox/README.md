@@ -14,8 +14,30 @@ Some roles are tailored to the Lamobo R1 right now (this concerns
 network interface names primarily), but can be used as a basis for
 setting up other kinds of machines.
 
+## Systemd Networking Units
 
-TODOs
+(TODO)
+
+See also https://www.freedesktop.org/wiki/Software/systemd/NetworkTarget/
+
+`network.target` indicates that the network management stack is up.
+
+`network-online.target` indicates that the local LAN is up and
+running, including routing and firewalling. Internet connectivity
+(adslconnection.service) is not required by this unit (but in fact
+requires it).
+
+`network-pre.target` unused atm.
+
+Right there is this sequence of unit activations:
+
+networking.service -> routing.service -> firewall.service -> network-online.target -> adslconnection.service
+
+Maybe we can start firewall.service earlier (in parallel with
+routing.service) if it doesn't require the interfaces it configures to
+exist.
+
+## TODOs
 
 - variables refactoring:
 
