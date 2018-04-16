@@ -1,8 +1,8 @@
 [Unit]
 Description=Hostapd Wifi AP Daemon
-Wants=network.target
-Before=network.target multi-user.target shutdown.target
+Before=multi-user.target shutdown.target
 After=networking.service
+Requires=networking.service
 Conflicts=shutdown.target
 
 [Service]

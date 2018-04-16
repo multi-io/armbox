@@ -2,3 +2,4 @@
   systemd:
     name: firewall.service
     state: restarted
+    daemon_reload: True

@@ -2,3 +2,4 @@
   systemd:
     name: routing.service
     state: restarted
+    daemon_reload: True

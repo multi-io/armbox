@@ -1,8 +1,7 @@
 [Unit]
 Description=LSB: Raise network interfaces.
-Wants=network.target
-Before=network.target multi-user.target shutdown.target
-After=dbus.service network-pre.target systemd-sysusers.service
+Before=multi-user.target shutdown.target
+After=network.target dbus.service systemd-sysusers.service
 Conflicts=shutdown.target
 
 [Service]

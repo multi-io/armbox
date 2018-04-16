@@ -1,8 +1,8 @@
 [Unit]
 Description=Set Up firewall
-Wants=network.target
-Before=network.target multi-user.target shutdown.target
-After=dbus.service network-pre.target systemd-sysusers.service
+Before=network-online.target multi-user.target shutdown.target
+After=dbus.service routing.service systemd-sysusers.service
+Requires=routing.service
 Conflicts=shutdown.target
 
 [Service]

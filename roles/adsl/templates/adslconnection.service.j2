@@ -1,8 +1,8 @@
 [Unit]
 Description=ADSL internet connection
-Wants=network.target
-Before=network.target multi-user.target shutdown.target
-After=networking.service
+Before=shutdown.target
+After=network-online.target
+Requires=network-online.target
 Conflicts=shutdown.target
 
 StartLimitInterval=15s
