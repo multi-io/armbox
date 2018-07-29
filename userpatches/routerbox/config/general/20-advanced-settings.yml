@@ -10,3 +10,17 @@ physical_switch_vlans:
 sshd_options:
   - ['PasswordAuthentication', 'no']
   - ['PermitRootLogin', 'yes']  # needed by the default make setup-running-machine
+
+# additional packages to install
+# (must be defined, empty by default, board or user-specific config may override)
+additional_packages:
+
+# kernel modules to disable
+# (must be defined, empty by default, board or user-specific config may override)
+disabled_kernel_modules:
+
+# if the machine contains a physical switch that's programmable via the standard Linux  bridge tools,
+# this variable may be used to partition it into multiple networks (VLANs)
+# must be defined, empty by default, board or user-specific config may override.
+# see board/lamobo-r1.yml for an example that sets this.
+physical_switch_vlans: {}
