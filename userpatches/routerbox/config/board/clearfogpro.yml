@@ -1,0 +1,25 @@
+# Which interfaces to combine into which bridge interfaces (software switches),
+# with which IPs.
+# One of them must be the LAN interface, named {{lanif_name}}, IP {{lan_prefix}}.{{lan_host}}.
+bridges:
+
+  - name: "{{lanif_name}}"
+    members:
+    - "eth0"
+    - "eth1"
+    - "eth2"
+    - "eth3"
+    ip: "{{lan_prefix}}.{{lan_host}}"
+    ipv6_mtu: 1400  # for IPv6 only (does this really work?)
+
+  - name: "{{mgmtif_name}}"
+    members:
+    - "eth4"
+    ip: "{{management_ip}}"
+
+
+# WAN interface. The ADSL setup will configure this to be the PPPoE outgoing interface
+wan_interface: eth5
+
+# WLAN interface. Will be added to the {{lanif_name}} bridge interface
+wlan_interface: wlan0
