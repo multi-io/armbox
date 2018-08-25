@@ -1,11 +1,12 @@
-# the board contains three interfaces -- eth0, eth1, eth2 -- where eth1 is a hardware switch
-# with 6 ports lan1...lan6.
+# the board contains three interfaces -- eth0, eth1, eth2 -- where eth0 is the port on the far left
+# (labeled "WAN" on the standard enclosure), eth1 is a hardware switch with 6 ports lan1...lan6
+# (labeled "LAN" on the standard enclosure), and eth2 is the SFP port (labeled "SFP" on the standard
+# enclosure).
+# We expect a USB WiFi stick that's supported by the kernel to be plugged into the box, showing
+# up as wlan0.
 # We'll make eth0 the WAN interface, eth0 + the WiFi interface the LAN interface, and eth2 the
-# management interface.
+# management interface (which an SFP port is total overkill for, but anyway).
 
-# Which interfaces to combine into which bridge interfaces (software switches),
-# with which IPs.
-# One of them must be the LAN interface, named {{lanif_name}}, IP {{lan_prefix}}.{{lan_host}}.
 bridges:
 
   - name: "{{lanif_name}}"
