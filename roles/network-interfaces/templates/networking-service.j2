@@ -122,6 +122,7 @@ start)
       {% for member in bridge.members %}
     
     brctl addif {{bridge.name}} {{member}}
+    ip link set {{member}} up
 
       {% endfor %}
 
