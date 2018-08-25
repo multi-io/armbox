@@ -89,6 +89,10 @@ start)
 
     ip_forward
 
+    {% for iface in other_interfaces %}
+    ip link set {{iface}} up
+    {% endfor %}
+
     {% for sw_iface, vlans in physical_switch_vlans.items() %}
 
     brctl addbr physical_switch_{{sw_iface}}
@@ -187,6 +191,10 @@ stop)
       
     {% endfor %}
     
+    {% for iface in other_interfaces %}
+    ip link set {{iface}} down
+    {% endfor %}
+
     #ifupdown lo down
     ;;
 

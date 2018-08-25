@@ -24,3 +24,6 @@ disabled_kernel_modules:
 # must be defined, empty by default, board or user-specific config may override.
 # see board/lamobo-r1.yml for an example that sets this.
 physical_switch_vlans: {}
+
+# any other interfaces that must be brought up first
+other_interfaces: []
