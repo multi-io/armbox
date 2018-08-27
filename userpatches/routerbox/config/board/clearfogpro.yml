@@ -25,7 +25,11 @@ bridges:
     - "eth2"
     ip: "{{management_ip}}"
 
-
+# USB WiFi dongle firmwares
+additional_packages:
+  - firmware-atheros
+  - firmware-ralink
+  
 # WAN interface. The ADSL setup will configure this to be the PPPoE outgoing interface
 wan_interface: eth0
 
