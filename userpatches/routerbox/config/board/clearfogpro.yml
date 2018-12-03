@@ -4,8 +4,9 @@
 # enclosure).
 # We expect a USB WiFi stick that's supported by the kernel to be plugged into the box, showing
 # up as wlan0.
-# We'll make eth0 the WAN interface, eth0 + the WiFi interface the LAN interface, and eth2 the
-# management interface (which an SFP port is total overkill for, but anyway).
+# We'll make eth0 the WAN interface, eth1's ports + the WiFi interface
+# the LAN interface, and eth2 the management interface (which an SFP
+# port is total overkill for, but anyway).
 
 bridges:
 
@@ -25,13 +26,19 @@ bridges:
     - "eth2"
     ip: "{{management_ip}}"
 
+vlan_links:
+  # the WAN interface
+  - name: "vlan_wan"
+    device: eth0
+    vlan_id: 7
+
 # USB WiFi dongle firmwares
 additional_packages:
   - firmware-atheros
   - firmware-ralink
   
 # WAN interface. The ADSL setup will configure this to be the PPPoE outgoing interface
-wan_interface: eth0
+wan_interface: vlan_wan
 
 # WLAN interface. Will be added to the {{lanif_name}} bridge interface
 wlan_interface: wlan0
