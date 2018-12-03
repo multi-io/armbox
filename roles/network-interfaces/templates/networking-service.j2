@@ -143,6 +143,13 @@ start)
     #  hostapd is told about the bridge device and will add the wlan iface to it
     # brctl addif {{lanif_name}} wlan0
 
+    {% for vl in vlan_links %}
+
+    ip link add link {{vl.device}} name {{vl.name}} type vlan id {{vl.vlan_id}}
+    ip link set {{vl.name}} up
+
+    {% endfor %}
+
     log_action_end_msg $?
 
     ;;
@@ -156,6 +163,13 @@ stop)
     fi
 
     log_action_begin_msg "Deconfiguring network interfaces"
+
+    {% for vl in vlan_links %}
+
+    ip link set {{vl.name}} down
+    ip link delete {{vl.name}}
+
+    {% endfor %}
 
     {% for bridge in bridges %}
 
