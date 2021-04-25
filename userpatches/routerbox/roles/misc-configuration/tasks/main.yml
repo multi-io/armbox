@@ -1,0 +1,13 @@
+- name: remove unwanted packages
+  package:
+    name: "{{item}}"
+    state: absent
+  with_items:
+    - "rsyslog"
+
+- name: disable journald forwarding to syslog
+  lineinfile:
+    dest: /etc/systemd/journald.conf
+    regexp: "^ForwardToSyslog="
+    line: "ForwardToSyslog=no"
+  notify: restart systemd-journald service
