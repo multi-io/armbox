@@ -1,0 +1,55 @@
+# Root password. CHANGE THIS.
+root_password: 'EcElchyeib'
+
+# SSH authorized keys
+authorized_keys:
+  - 'ssh-rsa xxxxxxxxx olaf@tackd'
+  - 'ssh-rsa yyyyyyyyy oklischat@Olafs-MacBook-Air.local'
+
+# /24 network in which to assign the LAN IPs.
+# must be a /24
+lan_prefix: 192.168.143
+
+# IP address of management interface, if any.
+# Must be outside lan_prefix.
+management_ip: 192.168.112.1
+
+wlan_ssid: mywifi
+wlan_wpa_passphrase: 'supergeheim'
+
+wlan_channel: 6
+
+# local host's name
+local_hostname: myrouter
+
+# local domain name
+local_domainname: home.mylocal
+
+# static DHCP MAC -> IP mappings, if any
+# MAC address: IP (host part, in lan_prefix)
+dhcp_static_mappings:
+  'd0:33:33:33:33:33': '2'   # desktop
+  '68:44:55:66:77:88': '7'   # mobile
+  '00:0B:00:11:22:33': '8'   # SIP phone
+  '00:0B:44:55:66:77': '17'  # file server
+  '00:0B:88:99:aa:bb': '18'  # web server
+
+# static DNS IP -> name mappings
+# "IP    name"
+dns_static_mappings:
+  - "{{lan_prefix}}.2   desktop"
+  - "{{lan_prefix}}.2   desktop.{{local_domainname}}"
+  - "{{lan_prefix}}.17   files"
+  - "{{lan_prefix}}.17   files.{{local_domainname}}"
+  - "{{lan_prefix}}.18   www"
+  - "{{lan_prefix}}.18   www.{{local_domainname}}"
+
+# ADSL setup
+adsl_user: 08922838492@s92.bbi-o2.de
+adsl_password: d93kt9skrd
+
+# DynDNS setup
+dyndns_proto: 'freedns'
+dyndns_login: 'oklischat'
+dyndns_password: 'somepassword'
+dyndns_hostname: 'mybox.mooo.com'
