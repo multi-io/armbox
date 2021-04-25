@@ -7,9 +7,9 @@ iptables firewalling, DHCP and DNS for the local network, a separate
 management interface and network, ADSL uplink connectivity, DynDNS
 client setup.
 
-Only fully implemented for the Lamobo R1 right now, but can be used as
-a basis for creating images for other boards, as long as Armbian
-supports them.
+Only fully implemented for the Lamobo R1 and Clearfog Pro right now,
+but can be used as a basis for creating images for other boards, as long
+as Armbian supports them.
 
 ## Requirements
 
@@ -18,13 +18,17 @@ Vagrant.
 ## Basic Usage
 
 ```
-# customize settings
-$ cp userpatches/routerbox/vars_override/mine.yml.sample userpatches/routerbox/vars_override/mine.yml
-$ vim userpatches/routerbox/vars_override/mine.yml  # edit settings for the image to be built
+# specify board type
+$ cp env.make.sample env.make
+$ vim env.make  # edit board= variable
+# edit routerbox variables, which parameterize the board image setup
+$ cp userpatches/routerbox/config/postproc/99-mine.yml.sample userpatches/routerbox/config/postproc/99-mine.yml
+$ vim userpatches/routerbox/config/postproc/99-mine.yml  # edit settings for the image to be built
 $ make  # build the image into output/images/
 ```
 
-Run `make` to build an image into `output/images/`.
+See `userpatches/routerbox/README.md` for more details on the image
+settings.
 
 ## Description
 
@@ -54,8 +58,6 @@ to re-provision the already running machine.
 - STUN
 
 - /var not on SD card
-
-- /var/log no space left on device
 
 - configurable port forwardings
 
