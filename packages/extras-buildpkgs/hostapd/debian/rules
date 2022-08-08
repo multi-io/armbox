@@ -1,6 +1,8 @@
 #!/usr/bin/make -f
 
+# without "-relro,-pie" building on Stretch breaks
 export DEB_BUILD_MAINT_OPTIONS=hardening=+all
+
 include /usr/share/dpkg/buildflags.mk
 
 # The build system doesn't use CPPFLAGS, pass them to CFLAGS/CXXFLAGS to
@@ -52,10 +54,6 @@ override_dh_install:
 
 override_dh_installchangelogs:
 	dh_installchangelogs --package=hostapd hostapd/ChangeLog
-
-override_dh_gencontrol:
-	dh_gencontrol -phostapd -- '-v1:$(VERSION)'
-	dh_gencontrol --remaining-packages
 
 override_dh_builddeb:
 	dh_builddeb -- -Zxz -z6

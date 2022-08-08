@@ -3,38 +3,36 @@
 # Please edit /boot/armbianEnv.txt to set supported parameters
 #
 
-# run board detection
-run autodetectfdt
-
 # default values
 setenv rootdev "/dev/mmcblk0p1"
 setenv verbosity "1"
 setenv console "display"
-setenv rootfstype "ext4"
+setenv bootlogo "false"
 setenv disp_mode "1920x1080m60"
+setenv earlycon "off"
+if test -z "${bootfstype}"; then setenv rootfstype "ext4"; else setenv rootfstype "${bootfstype}"; fi
 
-# additional values
-setenv load_addr "0x10800000"
-setenv ramdisk_addr "0x14800000"
+if test "${board}" = mx6cuboxi; then 
+  setenv ramdisk_addr_r "0x14800000"
+  if test -z "${fdtfile}"; then setenv fdtfile "imx6q-cubox-i.dtb"; fi
+  if test -z "${cons}"; then setenv cons "ttymxc0,115200"; fi
+fi
 
-# next/dev kernels have another DT file name
-#if ext2load mmc 0 0x00000000 /boot/.next || ext2load mmc 0 0x00000000 .next; then
-#	setenv fdt_file "imx6q-cubox-i.dtb"
-#fi
-
-if ext2load mmc 0 ${load_addr} /boot/armbianEnv.txt || ext2load mmc 0 ${load_addr} armbianEnv.txt; then
-	env import -t ${load_addr} ${filesize}
+if load ${devtype} ${devnum}:${distro_bootpart} ${loadaddr} ${prefix}armbianEnv.txt ; then
+	env import -t ${loadaddr} ${filesize}
 fi
 
 if test "${console}" = "display" || test "${console}" = "both"; then setenv consoleargs "console=tty1"; fi
-if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "${consoleargs} console=ttymxc0,115200"; fi
+if test "${console}" = "serial" || test "${console}" = "both"; then setenv consoleargs "${consoleargs} console=${cons}"; fi
+if test "${earlycon}" = "on"; then setenv consoleargs "earlycon ${consoleargs}"; fi
+if test "${bootlogo}" = "true"; then setenv consoleargs "bootsplash.bootfile=bootsplash.armbian ${consoleargs}"; fi
 
-setenv bootargs "root=${rootdev} rootfstype=${rootfstype} rootwait ${consoleargs} consoleblank=0 video=mxcfb0:dev=hdmi,${disp_mode},if=RGB24,bpp=32 rd.dm=0 rd.luks=0 rd.lvm=0 raid=noautodetect pci=nomsi vt.global_cursor_default=0 loglevel=${verbosity} usb-storage.quirks=${usbstoragequirks} ${extraargs}"
-ext2load mmc 0 ${fdt_addr} /boot/dtb/${fdt_file} || fatload mmc 0 ${fdt_addr} /dtb/${fdt_file} || ext2load mmc 0 ${fdt_addr} /dtb/${fdt_file}
-ext2load mmc 0 ${ramdisk_addr} /boot/uInitrd || fatload mmc 0 ${ramdisk_addr} uInitrd || ext2load mmc 0 ${ramdisk_addr} uInitrd
-ext2load mmc 0 ${loadaddr} /boot/zImage || fatload mmc 0 ${loadaddr} zImage || ext2load mmc 0 ${loadaddr} zImage
+setenv bootargs "root=${rootdev} rootfstype=${rootfstype} rootwait ${consoleargs} consoleblank=0 video=mxcfb0:dev=hdmi,${disp_mode},if=RGB24,bpp=32 coherent_pool=2M cma=256M@2G rd.dm=0 rd.luks=0 rd.lvm=0 raid=noautodetect pci=nomsi vt.global_cursor_default=0 loglevel=${verbosity} usb-storage.quirks=${usbstoragequirks} ${extraargs}"
+load ${devtype} ${devnum}:${distro_bootpart} ${fdt_addr_r} ${prefix}dtb/${fdtfile}
+load ${devtype} ${devnum}:${distro_bootpart} ${ramdisk_addr_r} ${prefix}uInitrd
+load ${devtype} ${devnum}:${distro_bootpart} ${kernel_addr_r} ${prefix}zImage
 
-bootz ${loadaddr} ${ramdisk_addr} ${fdt_addr}
+bootz ${kernel_addr_r} ${ramdisk_addr_r} ${fdt_addr_r}
 
 # Recompile with:
 # mkimage -C none -A arm -T script -d /boot/boot.cmd /boot/boot.scr

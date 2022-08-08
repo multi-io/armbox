@@ -6,7 +6,7 @@
 #
 # - toggle boot verbosity (works)
 # - monitoring mode: continually print monitoring info (WiP)
-# - uploading /var/log/armhwinfo.log to online pastebin service
+# - uploading /var/log/armbian-hardware-monitor.log to online pastebin service
 #
 # Without arguments called it should present a simple user
 # interface that guides through:
@@ -120,7 +120,7 @@ Main() {
 } # Main
 
 ParseOptions() {
-	while getopts 'hHbBuUrRmMd:Dc:C:pPv' c ; do
+	while getopts 'hHbBuUrRmMsnNd:Dc:C:pPvz' c ; do
 	case ${c} in
 		H)
 			# display full help test
@@ -133,30 +133,48 @@ ParseOptions() {
 			DisplayUsage
 			exit 0
 			;;
-		m|M)
-			# monitoring mode
-			echo -e "Stop monitoring using [ctrl]-[c]"
+		m|M|s)
+			# monitoring mode, -s is for internal usage (debug log upload)
+			interval=$2
 			MonitorMode ${OPTARG}
 			exit 0
 			;;
-		u|U)
-			# Upload /var/log/armhwinfo.log to be of help in support forum.
-			fping sprunge.us | grep -q alive || \
-				(echo "Network/firewall problem detected. Please fix this or upload /var/log/armhwinfo.log manually." >&2 ; exit 1)
+		n|N)
+			# network monitoring mode
+			rf1=$2
+			NetworkMonitorMode ${OPTARG}
+			exit 0
+			;;
+		u)
+			# Upload /var/log/armbian-hardware-monitor.log with additional support info
+			fping ix.io 2>/dev/null | grep -q alive
+			if [ $? != 0 ]; then
+				echo -e "\nNetwork/firewall problem detected. Not able to upload debug info.\nPlease fix this or use \"-U\" instead and upload ${BOLD}whole output${NC} manually\n" >&2
+				exit 1
+			fi
 			which curl >/dev/null 2>&1 || apt-get -f -qq -y install curl
-			echo -e "/var/log/armhwinfo.log has been uploaded to \c"
+			echo -e "System diagnosis information will now be uploaded to \c"
 			# we obfuscate IPv4 addresses somehow but not too much, MAC addresses have to remain
-			# in clear since otherwise the log becomes worthless due to randomly generated 
+			# in clear since otherwise the log becomes worthless due to randomly generated
 			# addresses here and there that might conflict
 			CollectSupportInfo \
 				| sed -E 's/([0-9]{1,3}\.)([0-9]{1,3}\.)([0-9]{1,3}\.)([0-9]{1,3})/XXX.XXX.\3\4/g' \
-				| curl -F 'sprunge=<-' http://sprunge.us
-			echo -e "Please post the URL in the Armbian forum where you've been asked for."
+				| curl -F 'f:1=<-' ix.io
+			echo -e "Please post the URL in the forum where you've been asked for.\n"
+			exit 0
+			;;
+		U)
+			# Send support info to stdout to be uploaded manually. Add line numbers to prevent
+			# users being creative and supressing everything that's important
+			CollectSupportInfo \
+				| sed -E 's/([0-9]{1,3}\.)([0-9]{1,3}\.)([0-9]{1,3}\.)([0-9]{1,3})/XXX.XXX.\3\4/g' \
+				| awk '!NF{$0=" "}1' | nl -
+			echo -e "\nPlease upload the ${BOLD}whole output${NC} above to an online pasteboard service\nand provide the URL in the forum where you have been asked for this.\n"
 			exit 0
 			;;
 		r|R)
-			# Installs RPi-Monitor and patches config on sun8i
-			fping armbian.com | grep -q alive || \
+			# Installs RPi-Monitor and patches templates (heavily on sun8i)
+			fping armbian.com 2>/dev/null | grep -q alive || \
 				(echo "Network/firewall problem detected. Please fix this prior to installing RPi-Monitor." >&2 ; exit 1)
 			InstallRPiMonitor
 			case $(awk '/Hardware/ {print $3$4}' </proc/cpuinfo) in
@@ -169,14 +187,35 @@ ParseOptions() {
 							;;
 					esac
 					;;
+				*)
+					# On other SoCs than H3 make minor adjustments to config to reflect Armbian reality:
+					. /etc/armbian-release
+					sed -e "s/^web.status.1.name=.*/web.status.1.name=$BOARD_NAME/" \
+						-e "s/^web.statistics.1.name=.*/web.statistics.1.name=$BOARD_NAME/" \
+						</etc/rpimonitor/template/raspbian.conf >/etc/rpimonitor/template/armbian.conf
+					cd /etc/rpimonitor/
+					ln -sf /etc/rpimonitor/template/armbian.conf data.conf
+					# fix temperature everywhere
+					sed -i -e 's|^dynamic.12.source=.*|dynamic.12.source=/etc/armbianmonitor/datasources/soctemp|' \
+						-e 's|^dynamic.12.postprocess=.*|dynamic.12.postprocess=sprintf("%.1f", $1/1000)|' \
+						/etc/rpimonitor/template/temperature.conf
+					# monitor big cores on big.LITTLE
+					if [ $(grep -c '^processor' /proc/cpuinfo) -ge 4 ]; then
+						sed -i 's|/sys/devices/system/cpu/cpu0/cpufreq/|/sys/devices/system/cpu/cpu4/cpufreq/|g' \
+						/etc/rpimonitor/template/cpu.conf
+					fi
+					# display processor architecture instead of undefined
+					sed -i -e "s_^static.4.source=.*_static.4.source=lscpu | awk -F' ' '/^Architecture/ {print \$2}'_" \
+						-e "s/^static.4.regexp=.*/static.4.regexp=/" /etc/rpimonitor/template/version.conf
+					;;
 			esac
-			echo -e "\nNow you're able to enjoy RPi-Monitor at http://$((ifconfig -a) | sed -n '/inet addr/s/.*addr.\([^ ]*\) .*/\1/p' | head -1):8888"
+			echo -e "\nNow you're able to enjoy RPi-Monitor at http://$(ip a | awk -F" " '/inet / {print $2}' | grep -v '127.0.0.1' | cut -f1 -d/ | head -n1):8888"
 			exit 0
 			;;
 		p|P)
 			# Installs cpuminer on 32-bit platforms
 			dpkg --print-architecture | grep -q armhf || (echo -e "Functionality currently not supported on 64-bit platforms. Exiting\n" >&2 ; exit 1)
-			fping armbian.com | grep -q alive || \
+			fping armbian.com 2>/dev/null | grep -q alive || \
 				(echo "Network/firewall problem detected. Please fix this prior to installing cpuminer." >&2 ; exit 1)
 			cd /usr/local/src/
 			wget http://downloads.sourceforge.net/project/cpuminer/pooler-cpuminer-2.4.5.tar.gz
@@ -190,12 +229,12 @@ ParseOptions() {
 			exit 0
 			;;
 		d)
-			# monitor writes to disk
+			# monitors write activity to disk
 			MonitorIO "${OPTARG}"
 			exit 0
 			;;
 		D)
-			fping sprunge.us | grep -q alive || \
+			fping ix.io 2>/dev/null | grep -q alive || \
 				(echo "Network/firewall problem detected. Please fix this prior to installing RPi-Monitor." >&2 ; exit 1)
 			DebugOutput="$(mktemp /tmp/${0##*/}.XXXXXX)"
 			trap "rm \"${DebugOutput}\" ; exit 0" 0 1 2 3 15
@@ -207,9 +246,9 @@ ParseOptions() {
 			echo -e "\nDebug output has been collected at the following URL: \c"
 			(cat "${DebugOutput}"; echo -e "\n\n\ngdisk.txt contents:\n" ; cat "${MyTempDir}/gdisk.txt" ;\
 				echo -e "\n\n\nsmartctl.txt contents:\n" ; cat "${MyTempDir}/smartctl.txt") \
-				| curl -F 'sprunge=<-' http://sprunge.us
+				| curl -F 'f:1=<-' ix.io
 			echo -e "Please post the URL in the Armbian forum where you've been asked for."
-			exit 0			
+			exit 0
 			;;
 		c|C)
 			# check card mode
@@ -220,6 +259,12 @@ ParseOptions() {
 			# Verify installation integrity
 			VerifyRepairExcludes="/etc/|/boot/|cache|getty|/var/lib/smartmontools/"
 			VerifyInstallation
+			exit 0
+			;;
+		z)
+			# Do a quick 7-zip benchmark to estimate CPU performance
+			runs=$2
+			Run7ZipBenchmark 2>/dev/null
 			exit 0
 			;;
 	esac
@@ -237,11 +282,15 @@ DisplayUsage() {
 	echo -e " armbianmonitor ${BOLD}-c /path/to/test${NC} performs disk health/performance tests"
 	echo -e " armbianmonitor ${BOLD}-d${NC} monitors writes to \$device"
 	echo -e " armbianmonitor ${BOLD}-D${NC} tries to upload debug disk info to improve armbianmonitor"
-	echo -e " armbianmonitor ${BOLD}-m${NC} provides simple CLI monitoring"
+	echo -e " armbianmonitor ${BOLD}-m${NC} provides simple CLI monitoring - scrolling output"
+	echo -e " armbianmonitor ${BOLD}-M${NC} provides simple CLI monitoring - fixed-line output"
+	echo -e " armbianmonitor ${BOLD}-n${NC} provides simple CLI network monitoring - scrolling output"
+	echo -e " armbianmonitor ${BOLD}-N${NC} provides simple CLI network monitoring - fixed-line output"
 	echo -e " armbianmonitor ${BOLD}-p${NC} tries to install cpuminer for performance measurements"
 	echo -e " armbianmonitor ${BOLD}-r${NC} tries to install RPi-Monitor"
-	echo -e " armbianmonitor ${BOLD}-u${NC} tries to upload armhwinfo.log for support purposes"
-	echo -e " armbianmonitor ${BOLD}-v${NC} tries to verify installed package integrity\n"
+	echo -e " armbianmonitor ${BOLD}-u${NC} tries to upload armbian-hardware-monitor.log for support purposes"
+	echo -e " armbianmonitor ${BOLD}-v${NC} tries to verify installed package integrity"
+	echo -e " armbianmonitor ${BOLD}-z${NC} runs a quick 7-zip benchmark to estimate CPU performance\n"
 	echo -e "############################################################################\n"
 } # DisplayUsage
 
@@ -254,10 +303,12 @@ MonitorMode() {
 	# - Soc temperature if available
 	# - PMIC temperature if available
 	# - DC-IN voltage if available
-	# TODO: Format output nicely
 
 	# Allow armbianmonitor to return back to armbian-config
-	trap "exit 0" 0 1 2 3 15
+	trap "echo ; exit 0" 0 1 2 3 15
+	
+	# Try to renice to 19 to not interfere with OS behaviour
+	renice 19 $BASHPID >/dev/null 2>&1
 
 	LastUserStat=0
 	LastNiceStat=0
@@ -267,6 +318,9 @@ MonitorMode() {
 	LastIrqStat=0
 	LastSoftIrqStat=0
 	LastCpuStatCheck=0
+	LastTotal=0
+
+	SleepInterval=${interval:-5}
 
 	Sensors="/etc/armbianmonitor/datasources/"
 	if [ -f /sys/devices/system/cpu/cpu4/cpufreq/cpuinfo_cur_freq ]; then
@@ -279,31 +333,55 @@ MonitorMode() {
 		DisplayHeader="Time      CPU n/a    load %cpu %sys %usr %nice %io %irq"
 		CPUs=notavailable
 	fi
+	# Set freq output to --- if non-privileged. Overwrites settings above.
+	if [ "$(id -u)" != "0" ]; then
+		echo "Running unprivileged. CPU frequency will not be displayed."
+		CPUs=notavailable
+	fi
+
 	[ -f "${Sensors}/soctemp" ] && DisplayHeader="${DisplayHeader}   CPU" || SocTemp='n/a'
 	[ -f "${Sensors}/pmictemp" ] && DisplayHeader="${DisplayHeader}   PMIC" || PMICTemp='n/a'
 	DCIN=$(CheckDCINVoltage)
 	[ -f "${DCIN}" ] && DisplayHeader="${DisplayHeader}   DC-IN" || DCIN='n/a'
-	echo -e "${DisplayHeader}\c"
+	[ -f /sys/devices/virtual/thermal/cooling_device0/cur_state ] \
+		&& DisplayHeader="${DisplayHeader}  C.St." || CoolingState='n/a'
+	echo -e "Stop monitoring using [ctrl]-[c]"
+	[ $(echo "${SleepInterval} * 10" | bc | cut -d. -f1) -le 15 2>/dev/null ] \
+		&& echo "Warning: High update frequency (${SleepInterval} sec) might change system behaviour!"
+	echo -e "${DisplayHeader}"
 	Counter=0
 	while true ; do
-		let Counter++
-		if [ ${Counter} -eq 15 ]; then
-			echo -e "\n${DisplayHeader}\c"
-			Counter=0
+		if [ "$c" == "m" ]; then
+			let Counter++
+			if [ ${Counter} -eq 15 ]; then
+				echo -e "\n${DisplayHeader}\c"
+				Counter=0
+			fi
+		elif [ "$c" == "s" ]; then
+			# internal mode for debug log upload
+			let Counter++
+			if [ ${Counter} -eq 6 ]; then
+				exit 0
+			fi
+		else
+			printf "\x1b[1A"
 		fi
 		LoadAvg=$(cut -f1 -d" " </proc/loadavg)
 		case ${CPUs} in
 			biglittle)
 				BigFreq=$(awk '{printf ("%0.0f",$1/1000); }' </sys/devices/system/cpu/cpu4/cpufreq/cpuinfo_cur_freq) 2>/dev/null
 				LittleFreq=$(awk '{printf ("%0.0f",$1/1000); }' </sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq) 2>/dev/null
-				echo -e "\n$(date "+%H:%M:%S"): $(printf "%4s" ${BigFreq})/$(printf "%4s" ${LittleFreq})MHz $(printf "%5s" ${LoadAvg}) $(ProcessStats)\c"
+				ProcessStats
+				echo -e "\n$(date "+%H:%M:%S"): $(printf "%4s" ${BigFreq})/$(printf "%4s" ${LittleFreq})MHz $(printf "%5s" ${LoadAvg}) ${procStats}\c"
 				;;
 			normal)
 				CpuFreq=$(awk '{printf ("%0.0f",$1/1000); }' </sys/devices/system/cpu/cpu0/cpufreq/cpuinfo_cur_freq) 2>/dev/null
-				echo -e "\n$(date "+%H:%M:%S"): $(printf "%4s" ${CpuFreq})MHz $(printf "%5s" ${LoadAvg}) $(ProcessStats)\c"
+				ProcessStats
+				echo -e "\n$(date "+%H:%M:%S"): $(printf "%4s" ${CpuFreq})MHz $(printf "%5s" ${LoadAvg}) ${procStats}\c"
 				;;
 			notavailable)
-				echo -e "\n$(date "+%H:%M:%S"):   ---     $(printf "%5s" ${LoadAvg}) $(ProcessStats)\c"
+				ProcessStats
+				echo -e "\n$(date "+%H:%M:%S"):   ---     $(printf "%5s" ${LoadAvg}) ${procStats}\c"
 				;;
 		esac
 		if [ "X${SocTemp}" != "Xn/a" ]; then
@@ -313,11 +391,28 @@ MonitorMode() {
 			fi
 			echo -e " $(printf "%4s" ${SocTemp})°C\c"
 		fi
-		[ "X${PMICTemp}" != "Xn/a" ] && \
-			(PMICTemp=$(awk '{printf ("%0.1f",$1/1000); }' <"${Sensors}/pmictemp") ; echo -e " $(printf "%4s" ${PMICTemp})°C\c")
-		[ "X${DCIN}" != "Xn/a" ] && \
-			(DCINvoltage=$(awk '{printf ("%0.2f",$1/1000000); }' <"${DCIN}") ; echo -e "  $(printf "%4s" ${DCINvoltage})V\c")
-		sleep ${1:-5}
+		if [ "X${PMICTemp}" != "Xn/a" ]; then
+			read PMICTemp <"${Sensors}/pmictemp"
+			if [ ${PMICTemp} -ge 1000 ]; then
+				PMICTemp=$(awk '{printf ("%0.1f",$1/1000); }' <<<${PMICTemp})
+			fi
+			echo -e " $(printf "%4s" ${PMICTemp})°C\c"
+		fi
+		if [ "X${DCIN}" != "Xn/a" ]; then
+			case "${DCIN##*/}" in
+				in_voltage2_raw)
+					# Tinkerboard S
+					read RAWvoltage <"${DCIN}"
+					DCINvoltage=$(echo "(${RAWvoltage} / ((82.0/302.0) * 1023.0 / 1.8)) + 0.1" | bc -l)
+					;;
+				*)
+					DCINvoltage=$(awk '{printf ("%0.2f",$1/1000000); }' <"${DCIN}")
+					;;
+			esac
+			echo -e "  $(printf "%5s" ${DCINvoltage})V\c"
+		fi
+		[ "X${CoolingState}" != "Xn/a" ] && printf "  %d/%d" $(cat /sys/devices/virtual/thermal/cooling_device0/cur_state) $(cat /sys/devices/virtual/thermal/cooling_device0/max_state)
+		[ "$c" == "s" ] && sleep 0.3 || sleep ${SleepInterval}
 	done
 } # MonitorMode
 
@@ -325,7 +420,7 @@ CheckDCINVoltage() {
 	for i in /sys/devices/platform/sunxi-i2c.0/i2c-0/0-0034/axp20-supplyer.28/power_supply/usb/voltage_now \
 		/sys/power/axp_pmu/vbus/voltage \
 		/sys/devices/platform/sunxi-i2c.0/i2c-0/0-0034/axp20-supplyer.28/power_supply/ac/voltage_now \
-		/sys/power/axp_pmu/ac/voltage ; do
+		/sys/power/axp_pmu/ac/voltage '/sys/bus/iio/devices/iio:device0/in_voltage2_raw' ; do
 		if [ -f $i ]; then
 			read DCINvoltage <$i 2>/dev/null
 			if [ ${DCINvoltage} -gt 4080000 ]; then
@@ -347,30 +442,37 @@ ProcessStats() {
 		IOWaitLoad=$5
 		IrqCombinedLoad=$6		
 	else
-		set $(awk -F" " '/^cpu / {print $2"\t"$3"\t"$4"\t"$5"\t"$6"\t"$7"\t"$8}' </proc/stat)
-		UserStat=$1
-		NiceStat=$2
-		SystemStat=$3
-		IdleStat=$4
-		IOWaitStat=$5
-		IrqStat=$6
-		SoftIrqStat=$7
-		
+		procStatLine=(`sed -n 's/^cpu\s//p' /proc/stat`)
+		UserStat=${procStatLine[0]}
+		NiceStat=${procStatLine[1]}
+		SystemStat=${procStatLine[2]}
+		IdleStat=${procStatLine[3]}
+		IOWaitStat=${procStatLine[4]}
+		IrqStat=${procStatLine[5]}
+		SoftIrqStat=${procStatLine[6]}
+
+		Total=0
+		for eachstat in ${procStatLine[@]}; do
+			Total=$(( ${Total} + ${eachstat} ))
+		done
+
 		UserDiff=$(( ${UserStat} - ${LastUserStat} ))
 		NiceDiff=$(( ${NiceStat} - ${LastNiceStat} ))
 		SystemDiff=$(( ${SystemStat} - ${LastSystemStat} ))
-		IdleDiff=$(( ${IdleStat} - ${LastIdleStat} ))
 		IOWaitDiff=$(( ${IOWaitStat} - ${LastIOWaitStat} ))
 		IrqDiff=$(( ${IrqStat} - ${LastIrqStat} ))
 		SoftIrqDiff=$(( ${SoftIrqStat} - ${LastSoftIrqStat} ))
 		
-		Total=$(( ${UserDiff} + ${NiceDiff} + ${SystemDiff} + ${IdleDiff} + ${IOWaitDiff} + ${IrqDiff} + ${SoftIrqDiff} ))
-		CPULoad=$(( ( ${Total} - ${IdleDiff} ) * 100 / ${Total} ))
-		UserLoad=$(( ${UserDiff} *100 / ${Total} ))
-		SystemLoad=$(( ${SystemDiff} *100 / ${Total} ))
-		NiceLoad=$(( ${NiceDiff} *100 / ${Total} ))
-		IOWaitLoad=$(( ${IOWaitDiff} *100 / ${Total} ))
-		IrqCombinedLoad=$(( ( ${IrqDiff} + ${SoftIrqDiff} ) *100 / ${Total} ))
+		diffIdle=$(( ${IdleStat} - ${LastIdleStat} ))
+		diffTotal=$(( ${Total} - ${LastTotal} ))
+		diffX=$(( ${diffTotal} - ${diffIdle} ))
+		CPULoad=$(( ${diffX}* 100 / ${diffTotal} ))
+		UserLoad=$(( ${UserDiff}* 100 / ${diffTotal} ))
+		SystemLoad=$(( ${SystemDiff}* 100 / ${diffTotal} ))
+		NiceLoad=$(( ${NiceDiff}* 100 / ${diffTotal} ))
+		IOWaitLoad=$(( ${IOWaitDiff}* 100 / ${diffTotal} ))
+		IrqCombined=$(( ${IrqDiff} + ${SoftIrqDiff} ))
+		IrqCombinedLoad=$(( ${IrqCombined}* 100 / ${diffTotal} ))
 
 		LastUserStat=${UserStat}
 		LastNiceStat=${NiceStat}
@@ -379,9 +481,9 @@ ProcessStats() {
 		LastIOWaitStat=${IOWaitStat}
 		LastIrqStat=${IrqStat}
 		LastSoftIrqStat=${SoftIrqStat}
+		LastTotal=${Total}
 	fi
-	echo -e "$(printf "%3s" ${CPULoad})%$(printf "%4s" ${SystemLoad})%$(printf "%4s" ${UserLoad})%$(printf "%4s" ${NiceLoad})%$(printf "%4s" ${IOWaitLoad})%$(printf "%4s" ${IrqCombinedLoad})%"
-
+	procStats=$(echo -e "$(printf "%3s" ${CPULoad})%$(printf "%4s" ${SystemLoad})%$(printf "%4s" ${UserLoad})%$(printf "%4s" ${NiceLoad})%$(printf "%4s" ${IOWaitLoad})%$(printf "%4s" ${IrqCombinedLoad})%")
 } # ProcessStats
 
 MonitorIO() {
@@ -582,8 +684,9 @@ CreateTempDir() {
 } #CreateTempFiles
 
 InstallRPiMonitor() {
-	# Installs rpimonitord based on the official instructions from
+	# Installs rpimonitord loosely based on the official instructions from
 	# http://rpi-experiences.blogspot.fr/p/rpi-monitor-installation.html
+	# but using the package from our own repository
 	if [ "$(id -u)" != "0" ]; then
 		echo "Installing RPi-Monitor requires root privileges, try sudo please. Exiting" >&2
 		exit 1
@@ -738,7 +841,7 @@ gwYNGjRo0KBBw1eEfwH4UoBHAKAAAA==" | base64 --decode | tar xzf -
 	which systemctl >/dev/null 2>&1
 	case $? in
 		0)
-			# Jessie
+			# Jessie|Stretch|Xenial|Bionic
 			systemctl enable rpimonitor-helper >/dev/null 2>&1
 			systemctl start rpimonitor-helper >/dev/null 2>&1
 			systemctl restart rpimonitor >/dev/null 2>&1
@@ -754,15 +857,17 @@ gwYNGjRo0KBBw1eEfwH4UoBHAKAAAA==" | base64 --decode | tar xzf -
 } # PatchRPiMonitor_for_sun8i
 
 CollectSupportInfo() {
-	[[ -s /var/log/armhwinfo.log ]] && cat /var/log/armhwinfo.log || zcat /var/log/armhwinfo.log.1.gz
+	[[ -s /var/log/armbian-hardware-monitor.log ]] && cat /var/log/armbian-hardware-monitor.log || zcat /var/log/armbian-hardware-monitor.log.1.gz 2>/dev/null
 	[[ -f /boot/armbianEnv.txt ]] && LOGLEVEL=$(awk -F'=' '/^verbosity/ {print $2}' /boot/armbianEnv.txt) || LOGLEVEL=1
 	if [ ${LOGLEVEL} -gt 4 ]; then
 		VERBOSE='-v'
 		which lshw >/dev/null 2>&1 && (echo -e "\n### lshw:" ; lshw -quiet -sanitize -numeric)
 	fi
-	lsusb >/dev/null 2>&1 && (echo -e "\n### lsusb:" ; lsusb ${VERBOSE} 2>/dev/null ; echo "" ; lsusb -t 2>/dev/null)
-	lspci >/dev/null 2>&1 && (echo -e "\n### lspci:" ; lspci ${VERBOSE} 2>/dev/null)
+	lsusb >/dev/null 2>&1 && (echo -e "\n### lsusb:\n" ; lsusb ${VERBOSE} 2>/dev/null ; echo "" ; lsusb -t 2>/dev/null)
+	lspci >/dev/null 2>&1 && (echo -e "\n### lspci:\n" ; lspci ${VERBOSE} 2>/dev/null)
+	nvme >/dev/null 2>&1 && (echo -e "\n### nvme:\n" ; nvme list 2>/dev/null)
 	[ -z $SUDO_USER ] || echo -e "\n### Group membership of $(groups $SUDO_USER)"
+	echo -e "\n### Userland:\n\n$(cat /etc/os-release | grep PRETTY_NAME)"
 	echo -e "\n### Installed packages:\n\n$(dpkg -l | egrep "openmediavault|armbian| linux-")"
 	KernelVersion=$(awk -F" " '{print $3}' < /proc/version)
 	case ${KernelVersion} in
@@ -772,7 +877,17 @@ CollectSupportInfo() {
 	esac
 	echo -e "\n### Loaded modules:\n\n$(lsmod)"
 	[[ -f /var/log/nand-sata-install.log ]] && echo -e "\n### nand-sata-install.log:\n\n$(cat /var/log/nand-sata-install.log)"
-	echo -e "\n### Current sysinfo:\n\n$(iostat -p ALL | grep -v "^loop")\n\n$(vmstat -w)\n\n$(free -h)\n\n$(dmesg | tail -n 250)"
+	echo -e "\n### Current system health:\n\n$("$0" -s | egrep "^Time|^[0-9]")"
+	stress -t 3 -c $(grep -c processor /proc/cpuinfo) --backoff 250 >/dev/null 2>&1 &
+	"$0" -s | grep "^[0-9]"
+	# Include name resolving information only if upload is not possible
+	fping ix.io 2>/dev/null | grep -q alive || \
+		[ -f /etc/resolv.conf ] && echo -e "\n### resolv.conf\n\n$(ls -la /etc/resolv.conf ; cat /etc/resolv.conf)" || \
+		echo -e "\n### resolv.conf does not exist or readable"
+	echo -e "\n### Current sysinfo:\n\n$(iostat -p ALL | grep -v "^loop")\n\n$(vmstat -w)\n\n$(free -h)\n\n$(zramctl 2>/dev/null)\n\n$(uptime)\n\n$(dmesg | tail -n 250)"
+	echo -e "\n"
+	[[ "$(id -u)" -eq "0" ]] && for sysfsnode in /proc/sys/vm/* ; do sysctl $(echo ${sysfsnode} | sed 's|/proc/sys/vm/|vm.|'); done
+	echo -e "\n### interrupts:\n$(cat /proc/interrupts)"
 	ls /tmp/armbianmonitor_checks_* >/dev/null 2>&1 || return
 	for file in /tmp/armbianmonitor_checks_* ; do
 		echo -e "\n### \c"
@@ -918,6 +1033,12 @@ GetDevice() {
 } # GetDevice
 
 VerifyInstallation() {
+	# Ensure that we're running as root since otherwise querying SATA/USB disks won't work
+	if [ "$(id -u)" != "0" ]; then
+		echo "This check must be run as root. Aborting." >&2
+		exit 1
+	fi
+	
 	echo -e "Starting package integrity check. This might take some time. Be patient please..."
 	OUTPUT=$(dpkg --verify | egrep -v -i "${VerifyRepairExcludes}" | awk -F" /" '{print "/"$2}')
 	if [[ -z $OUTPUT ]]; then
@@ -930,5 +1051,150 @@ VerifyInstallation() {
 		echo -e "${OUTPUT}\n"
 	fi
 } # VerifyInstallation
+
+NetworkMonitorMode() {
+
+	# Allow armbianmonitor to return back to armbian-config
+	trap "echo ; exit 0" 0 1 2 3 15
+	
+	# Count interfaces - multiple routes causing interfaces to show up more than once, filtering...
+	ifacecount=$(route -n | egrep UG | egrep -o '[^ ]*$' | sort | uniq)
+	# If there are two ore more interfaces detected open a dynamic dialog box to select which to monitor
+	if [ "$(echo -e $ifacecount | tr ' ' '\n' | wc -l)" -gt 1 ]; then
+		ifacemenu=$(route -n | egrep UG | egrep -o '[^ ]*$' | sort | uniq | awk '{a[$1]=$1}END{for(i in a)printf i" "a[i]" "}')
+		ifacefunc() {
+			dialog --backtitle "Interface selector" \
+			--title "Multiple network interfaces detected" \
+			--menu "Choose which interface to monitor:" \
+			15 50 $(route -n | egrep UG | egrep -o '[^ ]*$' | sort | uniq | wc -l) \
+			$(echo $ifacemenu) 2>&1 >$(tty)
+		}
+		iface=$(ifacefunc)
+	else
+	# Use default behavior if one interface is found only
+		iface=$(route -n | egrep UG | egrep -o '[^ ]*$')
+	fi
+	timerStart
+	kickAllStatsDown
+	
+	printf "\nruntime network statistics: $(uname -n)\n"
+	printf "network interface: $(echo $iface)\n"
+	printf "[tap 'd' to display column headings]\n"
+	printf "[tap 'z' to reset counters]\n"
+	printf "[use <ctrl-c> to exit]\n"
+	printf "[bps: bits/s, Mbps: megabits/s, pps: packets/s, MB: megabytes]\n\n"
+	printf "%-11s %-66s          %-66s\n" $(echo -en "$iface rx.stats____________________________________________________________ tx.stats____________________________________________________________")
+	printf "%-11s %-11s %-11s \u01B0.%-11s %-11s \u01B0.%-11s \u01A9.%-11s %-11s %-11s \u01B0.%-11s %-11s \u01B0.%-11s \u01A9.%-11s\n\n" $(echo -en "count bps Mbps Mbps pps pps MB bps Mbps Mbps pps pps MB")
+	
+	while true; do
+		nss=(`sed -n 's/'$iface':\s//p' /proc/net/dev`)
+		rxB=${nss[0]}
+		rxP=${nss[1]}
+		txB=${nss[8]}
+		txP=${nss[9]}
+		drxB=$(( ${rxB} - ${prxB} ))
+		drxb=$(( ${drxB}* 8 ))
+		drxmb=$(echo "scale=2;$drxb/1000000"|bc)
+		drxP=$(( ${rxP} - ${prxP}  ))
+		dtxB=$(( ${txB} - ${ptxB} ))
+		dtxb=$(( ${dtxB}* 8 ))
+		dtxmb=$(echo "scale=2;$dtxb/1000000"|bc)
+		dtxP=$(( ${txP} - ${ptxP} ))
+		if [ "$cnt" != "0" ]; then
+			if [ "$c" == "N" ]; then
+				printf "\x1b[1A"
+			fi
+			srxb=$(( ${srxb} + ${drxb} ))
+			stxb=$(( ${stxb} + ${dtxb} ))
+			srxB=$(( ${srxB} + ${drxB} ))
+			stxB=$(( ${stxB} + ${dtxB} ))
+			srxP=$(( ${srxP} + ${drxP} ))
+			stxP=$(( ${stxP} + ${dtxP} ))
+			srxMB=$(echo "scale=2;$srxB/1024^2"|bc)
+			stxMB=$(echo "scale=2;$stxB/1024^2"|bc)
+			arxb=$(echo "scale=2;$srxb/$cnt"|bc)
+			atxb=$(echo "scale=2;$stxb/$cnt"|bc)
+			arxmb=$(echo "scale=2;$arxb/1000000"|bc)
+			atxmb=$(echo "scale=2;$atxb/1000000"|bc)
+			arxP=$(echo "scale=0;$srxP/$cnt"|bc)
+			atxP=$(echo "scale=0;$stxP/$cnt"|bc)
+			printf "%-11s %-11s %-11s   %-11s %-11s   %-11s   %-11s %-11s %-11s   %-11s %-11s   %-11s   %-11s\n" $(echo -en "$cnt $drxb $drxmb $arxmb $drxP $arxP $srxMB $dtxb $dtxmb $atxmb $dtxP $atxP $stxMB")
+		fi
+		prxB="$rxB"
+		prxP="$rxP"
+		ptxB="$txB"
+		ptxP="$txP"
+		let cnt++
+		timerShut
+		read -n1 -s -t$procSecs zeroAll
+		timerStart
+		if [ "$zeroAll" == 'z' ]; then
+			kickAllStatsDown
+		fi
+		if [ "$zeroAll" == 'd' ]; then
+			scrollingHeader
+		fi
+	done
+}
+
+scrollingHeader() {
+	printf "%-11s %-66s          %-66s\n" $(echo -en "$iface rx.stats____________________________________________________________ tx.stats____________________________________________________________")
+	printf "%-11s %-11s %-11s \u01B0.%-11s %-11s \u01B0.%-11s \u01A9.%-11s %-11s %-11s \u01B0.%-11s %-11s \u01B0.%-11s \u01A9.%-11s\n\n" $(echo -en "count bps Mbps Mbps pps pps MB bps Mbps Mbps pps pps MB")
+}
+
+timerStart() {
+	read st0 st1 < <(date +'%s %N')
+}
+timerShut() {
+	read sh0 sh1 < <(date +'%s %N')
+	jusquaQuand=$(echo "scale=2;($sh0-$st0)*1000000000+($sh1-$st1)"|bc)
+	procSecs=$(echo "scale=2;(1000000000-$jusquaQuand)/1000000000"|bc)
+	if [ "$rf1" == "debug" ]; then
+		printf "time controller adjustment: $procSecs\n"
+		if [ "$c" == "N" ]; then
+			printf "\x1b[1A"
+		fi
+	fi
+}
+kickAllStatsDown() {
+	prxB=0
+	prxP=0
+	ptxB=0
+	ptxP=0
+	srxb=0
+	stxb=0
+	srxB=0
+	stxB=0
+	srxMB=0
+	stxMB=0
+	srxP=0
+	stxP=0
+	cnt=0
+}
+
+Run7ZipBenchmark() {
+	echo -e "Preparing benchmark. Be patient please..."
+	# Do a quick 7-zip benchmark, check whether binary is there. If not install it
+	MyTool=$(which 7za || which 7zr)
+	[ -z "${MyTool}" ] && apt-get -f -qq -y install p7zip && MyTool=/usr/bin/7zr
+	[ -z "${MyTool}" ] && (echo "No 7-zip binary found and could not be installed. Aborting" >&2 ; exit 1)
+	# Send CLI monitoring to the background to be able to spot throttling and other problems
+	MonitoringOutput="$(mktemp /tmp/${0##*/}.XXXXXX)"
+	trap "rm \"${MonitoringOutput}\" ; exit 0" 0 1 2 3 15
+	armbianmonitor -m >${MonitoringOutput} &
+	MonitoringPID=$!
+	# run 7-zip benchmarks after waiting 10 seconds to spot whether the system was idle before.
+	# We run the benchmark a single time by default unless otherwise specified on the command line
+	RunHowManyTimes=${runs:-1}
+	sleep 10
+	for ((i=1;i<=RunHowManyTimes;i++)); do
+		"${MyTool}" b
+	done
+	# report CLI monitoring results as well
+	kill ${MonitoringPID}
+	echo -e "\nMonitoring output recorded while running the benchmark:\n"
+	sed -e '/^\s*$/d' -e '/^Stop/d' <${MonitoringOutput}
+	echo -e "\n"
+} # Run7ZipBenchmark
 
 Main "$@"

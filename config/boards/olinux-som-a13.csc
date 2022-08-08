@@ -1,11 +1,5 @@
-# A13 single core 512Mb SoM
+# Allwinner A13 single core 512Mb SoM
 BOARD_NAME="SoM A13"
-LINUXFAMILY="sun5i"
+BOARDFAMILY="sun5i"
 BOOTCONFIG="A13-OLinuXino_defconfig"
-MODULES="gpio_sunxi spi_sunxi"
-MODULES_NEXT="bonding"
-#
-KERNEL_TARGET="default,next,dev"
-CLI_TARGET=""
-DESKTOP_TARGET=""
-#
+KERNEL_TARGET="current,edge"
