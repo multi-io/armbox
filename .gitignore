@@ -7,7 +7,10 @@ ubuntu-*-cloudimg-console.log
 ### but not default (supplied) files
 !/config-docker.conf
 !/config-vagrant.conf
-!/config-armbox.conf
+/userpatches/config-*.conf
+/userpatches/Dockerfile
+/userpatches/Vagrantfile
+!/userpatches/config-armbox.conf
 /userpatches/routerbox/vars_override/*.yml
 
 ### output directories
@@ -16,8 +19,6 @@ ubuntu-*-cloudimg-console.log
 /output*/
 /cache/
 cache
-/*userpatches*/
-/userpatches
 
 ### General annoyances ###
 .DS_Store
@@ -33,5 +34,5 @@ cache
 
 ### Armbox
 /env.make
-99-*.yml
+99-*.yml*
 /.idea
