@@ -5,6 +5,9 @@ BOARD ?= undefined
 
 ANSIBLE_PARAMS=
 
+build-docker:
+	./compile.sh docker armbox
+
 build:
 	vagrant up --provision
 	vagrant ssh -- '/vagrant/scripts/force_unmount.sh; sudo BOARD=$(BOARD) /vagrant/compile.sh armbox'
