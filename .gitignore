@@ -33,6 +33,6 @@ cache
 *.retry
 
 ### Armbox
-/env.make
+/armbox.conf
 99-*.yml*
 /.idea

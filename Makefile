@@ -1,8 +1,3 @@
--include env.make
-
-# must be set by caller, e.g. in env.make, or via the command line (make BOARD=lamobo-r1)
-BOARD ?= undefined
-
 ANSIBLE_PARAMS=
 
 build-docker:
@@ -10,7 +5,7 @@ build-docker:
 
 build:
 	vagrant up --provision
-	vagrant ssh -- '/vagrant/scripts/force_unmount.sh; sudo BOARD=$(BOARD) /vagrant/compile.sh armbox'
+	vagrant ssh -- '/vagrant/scripts/force_unmount.sh; sudo /vagrant/compile.sh armbox'
 
 destroyvm:
 	vagrant destroy
@@ -25,5 +20,6 @@ routerbox-push-origin:
 	support/git-subtree-push-origin-master.sh userpatches/routerbox
 
 setup-running-machine:
+	source ./armbox.conf; \
 	cd userpatches/routerbox; \
-	ansible-playbook $(ANSIBLE_PARAMS) -e board=$(BOARD) -i inventory.running-machine setup.yml
+	ansible-playbook $(ANSIBLE_PARAMS) -e board=$$BOARD -i inventory.running-machine setup.yml
