@@ -40,6 +40,7 @@ gdebi
 ghostscript-x
 gist
 gnome-font-viewer
+gnome-disk-utility
 gnome-screenshot
 gnome-user-docs-de
 gnome-user-docs-es
@@ -108,7 +109,6 @@ pasystray
 pavucontrol
 pavucontrol-qt
 pavumeter
-pinta
 policykit-1
 policykit-desktop-privileges
 printer-driver-all
@@ -152,6 +152,7 @@ xdg-user-dirs
 xdg-user-dirs-gtk
 xfce4
 xfce4-notifyd
+xfce4-power-manager
 xfce4-screenshooter
 xfce4-terminal
 xfonts-100dpi

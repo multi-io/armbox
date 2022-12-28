@@ -1,37 +1,37 @@
-From 54e2037602d5adc04e3766e4ab50df18b60ef448 Mon Sep 17 00:00:00 2001
+From 330824ee7a46474f18d44d247633469e63675afa Mon Sep 17 00:00:00 2001
 From: Paolo Sabatino <paolo.sabatino@gmail.com>
-Date: Sun, 24 Jul 2022 15:09:13 +0000
-Subject: [PATCH] Add rk322x overlays
+Date: Tue, 4 Oct 2022 15:15:19 +0000
+Subject: [PATCH] rk322x device tree overlays
 
 ---
- arch/arm/boot/dts/overlay/Makefile            |  38 ++++++
- .../boot/dts/overlay/README.rk322x-overlays   |  90 ++++++++++++++
- .../arm/boot/dts/overlay/rk322x-bt-8723cs.dts |  19 +++
- .../arm/boot/dts/overlay/rk322x-cpu-hs-lv.dts |  66 ++++++++++
+ arch/arm/boot/dts/overlay/Makefile            |  39 +++++++
+ .../boot/dts/overlay/README.rk322x-overlays   |  90 +++++++++++++++
+ .../arm/boot/dts/overlay/rk322x-bt-8723cs.dts |  19 ++++
+ .../arm/boot/dts/overlay/rk322x-cpu-hs-lv.dts |  68 +++++++++++
  arch/arm/boot/dts/overlay/rk322x-cpu-hs.dts   |  28 +++++
- .../boot/dts/overlay/rk322x-cpu-stability.dts |  52 ++++++++
+ .../boot/dts/overlay/rk322x-cpu-stability.dts |  52 +++++++++
  arch/arm/boot/dts/overlay/rk322x-ddr3-330.dts |  28 +++++
  arch/arm/boot/dts/overlay/rk322x-ddr3-528.dts |  28 +++++
  arch/arm/boot/dts/overlay/rk322x-ddr3-660.dts |  28 +++++
  arch/arm/boot/dts/overlay/rk322x-ddr3-800.dts |  28 +++++
  .../dts/overlay/rk322x-emmc-ddr-ph180.dts     |  14 +++
  .../boot/dts/overlay/rk322x-emmc-ddr-ph45.dts |  14 +++
- .../boot/dts/overlay/rk322x-emmc-hs200.dts    |  13 ++
+ .../boot/dts/overlay/rk322x-emmc-hs200.dts    |  13 +++
  .../arm/boot/dts/overlay/rk322x-emmc-pins.dts |  22 ++++
- arch/arm/boot/dts/overlay/rk322x-emmc.dts     |  20 +++
+ arch/arm/boot/dts/overlay/rk322x-emmc.dts     |  20 ++++
  .../arm/boot/dts/overlay/rk322x-fixup.scr-cmd |   4 +
  .../dts/overlay/rk322x-led-conf-default.dts   |  22 ++++
- .../arm/boot/dts/overlay/rk322x-led-conf1.dts |  64 ++++++++++
- .../arm/boot/dts/overlay/rk322x-led-conf2.dts |  64 ++++++++++
- .../arm/boot/dts/overlay/rk322x-led-conf3.dts |  64 ++++++++++
- .../arm/boot/dts/overlay/rk322x-led-conf4.dts |  81 ++++++++++++
- .../arm/boot/dts/overlay/rk322x-led-conf5.dts |  97 +++++++++++++++
- .../arm/boot/dts/overlay/rk322x-led-conf6.dts | 115 ++++++++++++++++++
- .../arm/boot/dts/overlay/rk322x-led-conf7.dts | 106 ++++++++++++++++
+ .../arm/boot/dts/overlay/rk322x-led-conf1.dts |  64 +++++++++++
+ .../arm/boot/dts/overlay/rk322x-led-conf2.dts |  64 +++++++++++
+ .../arm/boot/dts/overlay/rk322x-led-conf3.dts |  64 +++++++++++
+ .../arm/boot/dts/overlay/rk322x-led-conf4.dts |  96 ++++++++++++++++
+ .../arm/boot/dts/overlay/rk322x-led-conf5.dts |  97 ++++++++++++++++
+ .../arm/boot/dts/overlay/rk322x-led-conf6.dts |  96 ++++++++++++++++
+ .../arm/boot/dts/overlay/rk322x-led-conf7.dts | 106 ++++++++++++++++++
  arch/arm/boot/dts/overlay/rk322x-nand.dts     |  22 ++++
  .../dts/overlay/rk322x-usb-otg-peripheral.dts |  11 ++
- .../dts/overlay/rk322x-wlan-alt-wiring.dts    |  67 ++++++++++
- 27 files changed, 1205 insertions(+)
+ .../dts/overlay/rk322x-wlan-alt-wiring.dts    |  67 +++++++++++
+ 27 files changed, 1204 insertions(+)
  create mode 100755 arch/arm/boot/dts/overlay/Makefile
  create mode 100755 arch/arm/boot/dts/overlay/README.rk322x-overlays
  create mode 100644 arch/arm/boot/dts/overlay/rk322x-bt-8723cs.dts
@@ -62,7 +62,7 @@ Subject: [PATCH] Add rk322x overlays
 
 diff --git a/arch/arm/boot/dts/overlay/Makefile b/arch/arm/boot/dts/overlay/Makefile
 new file mode 100755
-index 00000000000..661081dcb6e
+index 000000000000..36340c3162ce
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/Makefile
 @@ -0,0 +1,39 @@
@@ -107,7 +107,7 @@ index 00000000000..661081dcb6e
 +
 diff --git a/arch/arm/boot/dts/overlay/README.rk322x-overlays b/arch/arm/boot/dts/overlay/README.rk322x-overlays
 new file mode 100755
-index 00000000000..1c366d80921
+index 000000000000..1c366d809212
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/README.rk322x-overlays
 @@ -0,0 +1,90 @@
@@ -203,7 +203,7 @@ index 00000000000..1c366d80921
 +of USB host
 diff --git a/arch/arm/boot/dts/overlay/rk322x-bt-8723cs.dts b/arch/arm/boot/dts/overlay/rk322x-bt-8723cs.dts
 new file mode 100644
-index 00000000000..48bb04f779f
+index 000000000000..48bb04f779fa
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-bt-8723cs.dts
 @@ -0,0 +1,19 @@
@@ -228,10 +228,10 @@ index 00000000000..48bb04f779f
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-cpu-hs-lv.dts b/arch/arm/boot/dts/overlay/rk322x-cpu-hs-lv.dts
 new file mode 100755
-index 00000000000..de3522e381c
+index 000000000000..5f7d2dcf42d0
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-cpu-hs-lv.dts
-@@ -0,0 +1,65 @@
+@@ -0,0 +1,68 @@
 +/dts-v1/;
 +/plugin/;
 +
@@ -258,7 +258,7 @@ index 00000000000..de3522e381c
 +			};
 +			opp-1392000000 {
 +				opp-hz = /bits/ 64 <1392000000>;
-+				opp-microvolt = <1225000 1225000 1275000>; 
++				opp-microvolt = <1225000 1225000 1275000>;
 +			};
 +		};
 +	};
@@ -270,6 +270,9 @@ index 00000000000..de3522e381c
 +				opp-microvolt = <1050000 1050000 1200000>;
 +			};
 +			opp-300000000 {
++				opp-microvolt = <1050000 1050000 1200000>;
++			};
++			opp-400000000 {
 +				opp-microvolt = <1050000 1050000 1200000>;
 +			};
 +			opp-500000000 {
@@ -299,7 +302,7 @@ index 00000000000..de3522e381c
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-cpu-hs.dts b/arch/arm/boot/dts/overlay/rk322x-cpu-hs.dts
 new file mode 100755
-index 00000000000..1c2fc79e1cc
+index 000000000000..1c2fc79e1ccf
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-cpu-hs.dts
 @@ -0,0 +1,28 @@
@@ -333,7 +336,7 @@ index 00000000000..1c2fc79e1cc
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-cpu-stability.dts b/arch/arm/boot/dts/overlay/rk322x-cpu-stability.dts
 new file mode 100644
-index 00000000000..f434af9268f
+index 000000000000..f434af9268fb
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-cpu-stability.dts
 @@ -0,0 +1,52 @@
@@ -391,7 +394,7 @@ index 00000000000..f434af9268f
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-ddr3-330.dts b/arch/arm/boot/dts/overlay/rk322x-ddr3-330.dts
 new file mode 100644
-index 00000000000..78145548ed7
+index 000000000000..78145548ed7c
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-ddr3-330.dts
 @@ -0,0 +1,28 @@
@@ -425,7 +428,7 @@ index 00000000000..78145548ed7
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-ddr3-528.dts b/arch/arm/boot/dts/overlay/rk322x-ddr3-528.dts
 new file mode 100644
-index 00000000000..dbbd222dd8d
+index 000000000000..dbbd222dd8df
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-ddr3-528.dts
 @@ -0,0 +1,28 @@
@@ -459,7 +462,7 @@ index 00000000000..dbbd222dd8d
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-ddr3-660.dts b/arch/arm/boot/dts/overlay/rk322x-ddr3-660.dts
 new file mode 100644
-index 00000000000..65b707515bf
+index 000000000000..65b707515bfb
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-ddr3-660.dts
 @@ -0,0 +1,28 @@
@@ -493,7 +496,7 @@ index 00000000000..65b707515bf
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-ddr3-800.dts b/arch/arm/boot/dts/overlay/rk322x-ddr3-800.dts
 new file mode 100644
-index 00000000000..7d11453adf9
+index 000000000000..7d11453adf9d
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-ddr3-800.dts
 @@ -0,0 +1,28 @@
@@ -527,7 +530,7 @@ index 00000000000..7d11453adf9
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-emmc-ddr-ph180.dts b/arch/arm/boot/dts/overlay/rk322x-emmc-ddr-ph180.dts
 new file mode 100644
-index 00000000000..4ba0afb8a3a
+index 000000000000..4ba0afb8a3a4
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-emmc-ddr-ph180.dts
 @@ -0,0 +1,14 @@
@@ -547,7 +550,7 @@ index 00000000000..4ba0afb8a3a
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-emmc-ddr-ph45.dts b/arch/arm/boot/dts/overlay/rk322x-emmc-ddr-ph45.dts
 new file mode 100644
-index 00000000000..73104525de5
+index 000000000000..73104525de57
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-emmc-ddr-ph45.dts
 @@ -0,0 +1,14 @@
@@ -567,7 +570,7 @@ index 00000000000..73104525de5
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-emmc-hs200.dts b/arch/arm/boot/dts/overlay/rk322x-emmc-hs200.dts
 new file mode 100644
-index 00000000000..6ea81f5e74b
+index 000000000000..6ea81f5e74b0
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-emmc-hs200.dts
 @@ -0,0 +1,13 @@
@@ -586,7 +589,7 @@ index 00000000000..6ea81f5e74b
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-emmc-pins.dts b/arch/arm/boot/dts/overlay/rk322x-emmc-pins.dts
 new file mode 100644
-index 00000000000..0074d029ac8
+index 000000000000..0074d029ac84
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-emmc-pins.dts
 @@ -0,0 +1,22 @@
@@ -614,7 +617,7 @@ index 00000000000..0074d029ac8
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-emmc.dts b/arch/arm/boot/dts/overlay/rk322x-emmc.dts
 new file mode 100755
-index 00000000000..0a59ee30e5e
+index 000000000000..0a59ee30e5ee
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-emmc.dts
 @@ -0,0 +1,20 @@
@@ -640,7 +643,7 @@ index 00000000000..0a59ee30e5e
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-fixup.scr-cmd b/arch/arm/boot/dts/overlay/rk322x-fixup.scr-cmd
 new file mode 100755
-index 00000000000..d4c39e20a3a
+index 000000000000..d4c39e20a3a2
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-fixup.scr-cmd
 @@ -0,0 +1,4 @@
@@ -650,7 +653,7 @@ index 00000000000..d4c39e20a3a
 +
 diff --git a/arch/arm/boot/dts/overlay/rk322x-led-conf-default.dts b/arch/arm/boot/dts/overlay/rk322x-led-conf-default.dts
 new file mode 100644
-index 00000000000..7e4b35e333e
+index 000000000000..7e4b35e333e7
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-led-conf-default.dts
 @@ -0,0 +1,22 @@
@@ -678,7 +681,7 @@ index 00000000000..7e4b35e333e
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-led-conf1.dts b/arch/arm/boot/dts/overlay/rk322x-led-conf1.dts
 new file mode 100755
-index 00000000000..6846109d300
+index 000000000000..6846109d3008
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-led-conf1.dts
 @@ -0,0 +1,64 @@
@@ -748,7 +751,7 @@ index 00000000000..6846109d300
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-led-conf2.dts b/arch/arm/boot/dts/overlay/rk322x-led-conf2.dts
 new file mode 100755
-index 00000000000..40bdd5421d6
+index 000000000000..40bdd5421d68
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-led-conf2.dts
 @@ -0,0 +1,64 @@
@@ -818,7 +821,7 @@ index 00000000000..40bdd5421d6
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-led-conf3.dts b/arch/arm/boot/dts/overlay/rk322x-led-conf3.dts
 new file mode 100755
-index 00000000000..03c99ef8b6a
+index 000000000000..03c99ef8b6ad
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-led-conf3.dts
 @@ -0,0 +1,64 @@
@@ -888,10 +891,10 @@ index 00000000000..03c99ef8b6a
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-led-conf4.dts b/arch/arm/boot/dts/overlay/rk322x-led-conf4.dts
 new file mode 100644
-index 00000000000..0ebd846ebef
+index 000000000000..37dbe3610f28
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-led-conf4.dts
-@@ -0,0 +1,81 @@
+@@ -0,0 +1,96 @@
 +/dts-v1/;
 +/plugin/;
 +
@@ -972,10 +975,25 @@ index 00000000000..0ebd846ebef
 +
 +	};
 +
++	fragment@5 {
++		target = <&sdio>;
++		__overlay__ {
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			wifi@1 {
++				compatible = "esp,esp8089";
++				reg = <1>;
++				esp,crystal-26M-en = <0>;
++			};
++
++		};
++	};
++
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-led-conf5.dts b/arch/arm/boot/dts/overlay/rk322x-led-conf5.dts
 new file mode 100755
-index 00000000000..f74687eedc9
+index 000000000000..f74687eedc9e
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-led-conf5.dts
 @@ -0,0 +1,97 @@
@@ -1078,10 +1096,10 @@ index 00000000000..f74687eedc9
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-led-conf6.dts b/arch/arm/boot/dts/overlay/rk322x-led-conf6.dts
 new file mode 100644
-index 00000000000..045ab24932c
+index 000000000000..0c737f896f4e
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-led-conf6.dts
-@@ -0,0 +1,115 @@
+@@ -0,0 +1,96 @@
 +/dts-v1/;
 +/plugin/;
 +
@@ -1092,37 +1110,16 @@ index 00000000000..045ab24932c
 +/*
 + * gpio configuration for MXQ_PRO eMCP boards
 + *
-+ * - enables working and auxiliary leds
 + * - fixes low strength on sdio pins for wifi
-+ * - reduce frequency to 37.5 Mhz on sdio bus
 + * - correct gpio pins for wifi
++ * - set emmc pins and default phase shift
 + */
 +
 +/ {
 +
 +	fragment@0 {
-+		target-path = "/gpio-leds";
-+		__overlay__ {
-+
-+			auxiliary {
-+				gpios = <&gpio1 RK_PA7 GPIO_ACTIVE_LOW>;
-+				label = "auxiliary";
-+				linux,default-trigger = "mmc2";
-+				default-state = "off";
-+				pinctrl-names = "default";
-+				pinctrl-0 = <&gpio_led_aux>;
-+			};
-+
-+		};
-+	};
-+
-+	fragment@1 {
 +		target-path = "/pinctrl/gpio";
 +		__overlay__ {
-+
-+			gpio_led_aux: gpio-led-aux {
-+				rockchip,pins =  <1 RK_PA7 RK_FUNC_GPIO &pcfg_pull_none>;
-+			};
 +
 +			reset_key: reset-key {
 +				rockchip,pins = <3 RK_PD1 RK_FUNC_GPIO &pcfg_pull_up>;
@@ -1131,7 +1128,7 @@ index 00000000000..045ab24932c
 +		};
 +	};
 +
-+	fragment@2 {
++	fragment@1 {
 +		target = <&gpio_keys>;
 +		__overlay__ {
 +
@@ -1145,19 +1142,11 @@ index 00000000000..045ab24932c
 +				debounce-interval = <200>;
 +				wakeup-source;
 +			};
-+
-+			shutdown {
-+				gpios = <&gpio0 RK_PA3 GPIO_ACTIVE_LOW>;
-+				label = "shutdown";
-+				linux,code = <KEY_POWER>;
-+				debounce-interval = <200>;
-+				wakeup-source;
-+			};
-+
++		
 +		};
 +	};
 +
-+	fragment@3 {
++	fragment@2 {
 +		target = <&sdio_bus4>;
 +		__overlay__ {
 +			rockchip,pins = <3 2 1 &pcfg_pull_up>,
@@ -1168,38 +1157,48 @@ index 00000000000..045ab24932c
 +
 +	};
 +
-+	fragment@4 {
++	fragment@3 {
 +		target = <&sdio_clk>;
 +		__overlay__ {
 +			rockchip,pins = <3 0 1 &pcfg_pull_none>;
 +		};
 +	};
 +
-+	fragment@5 {
++	fragment@4 {
 +		target = <&sdio_cmd>;
 +		__overlay__ {
 +			rockchip,pins = <3 1 1 &pcfg_pull_up>;
 +		};
 +	};
 +
-+	fragment@6 {
-+		target = <&sdio>;
++	fragment@5 {
++		target = <&sdio_pwrseq>;
 +		__overlay__ {
-+			max-frequency = <37500000>;
++			post-power-on-delay-ms = <300>;
++			power-off-delay-us = <200000>;
++			reset-gpios = <&gpio2 RK_PD2 GPIO_ACTIVE_LOW>;
 +		};
 +	};
 +
-+	fragment@7 {
-+		target = <&sdio_pwrseq>;
++	fragment@6 {
++		target = <&sdio>;
 +		__overlay__ {
-+			reset-gpios = <&gpio2 RK_PD2 GPIO_ACTIVE_HIGH>;
++			#address-cells = <1>;
++			#size-cells = <0>;
++
++			wifi@1 {
++				compatible = "esp,esp8089";
++				reg = <1>;
++				esp,crystal-26M-en = <1>;
++			};
++
 +		};
 +	};
 +
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-led-conf7.dts b/arch/arm/boot/dts/overlay/rk322x-led-conf7.dts
 new file mode 100644
-index 00000000000..dda826d6d6e
+index 000000000000..dda826d6d6e9
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-led-conf7.dts
 @@ -0,0 +1,106 @@
@@ -1311,7 +1310,7 @@ index 00000000000..dda826d6d6e
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-nand.dts b/arch/arm/boot/dts/overlay/rk322x-nand.dts
 new file mode 100755
-index 00000000000..2a939ab492c
+index 000000000000..2a939ab492c8
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-nand.dts
 @@ -0,0 +1,22 @@
@@ -1339,7 +1338,7 @@ index 00000000000..2a939ab492c
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-usb-otg-peripheral.dts b/arch/arm/boot/dts/overlay/rk322x-usb-otg-peripheral.dts
 new file mode 100644
-index 00000000000..01e03d816c1
+index 000000000000..01e03d816c1d
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-usb-otg-peripheral.dts
 @@ -0,0 +1,11 @@
@@ -1356,7 +1355,7 @@ index 00000000000..01e03d816c1
 +};
 diff --git a/arch/arm/boot/dts/overlay/rk322x-wlan-alt-wiring.dts b/arch/arm/boot/dts/overlay/rk322x-wlan-alt-wiring.dts
 new file mode 100755
-index 00000000000..f04c9ac166b
+index 000000000000..f04c9ac166be
 --- /dev/null
 +++ b/arch/arm/boot/dts/overlay/rk322x-wlan-alt-wiring.dts
 @@ -0,0 +1,67 @@

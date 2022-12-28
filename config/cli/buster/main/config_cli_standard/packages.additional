@@ -2,7 +2,6 @@ alsa-utils
 aptitude
 avahi-autoipd
 bash-completion
-btrfs-progs
 dnsutils
 dosfstools
 ethtool
@@ -26,6 +25,8 @@ libproc-processtable-perl
 nfs-common
 ntfs-3g
 pciutils
+plymouth
+plymouth-themes
 pv
 qrencode
 rfkill

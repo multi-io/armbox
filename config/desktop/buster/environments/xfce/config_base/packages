@@ -40,6 +40,7 @@ gdebi
 ghostscript-x
 gist
 gnome-font-viewer
+gnome-disk-utility
 gnome-orca
 gstreamer1.0-packagekit
 gstreamer1.0-plugins-base-apps
@@ -116,6 +117,7 @@ xdg-user-dirs
 xdg-user-dirs-gtk
 xfce4
 xfce4-notifyd
+xfce4-power-manager
 xfce4-screenshooter
 xfce4-terminal
 xfonts-100dpi
