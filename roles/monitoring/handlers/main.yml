@@ -2,4 +2,3 @@
   systemd:
     name: prometheus-node-exporter.service
     state: restarted
-    detect_early_failure: yes
