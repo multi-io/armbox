@@ -137,7 +137,7 @@ prepare_host() {
 		sudo echo "apt-cacher-ng    apt-cacher-ng/tunnelenable      boolean false" | sudo debconf-set-selections
 
 		LOG_OUTPUT_FILE="${DEST}"/${LOG_SUBPATH}/hostdeps.log
-		install_pkg_deb "autoupdate $hostdeps"
+		install_pkg_deb "upgrade autoupdate $hostdeps"
 		unset LOG_OUTPUT_FILE
 
 		update-ccache-symlinks
