@@ -19,12 +19,12 @@ Vagrant.
 
 ```
 # specify board type
-$ cp env.make.sample env.make
-$ vim env.make  # edit board= variable
+$ cp armbox.conf.sample armbox.conf
+$ vim armbox.conf  # edit BOARD= variable
 # edit routerbox variables, which parameterize the board image setup
 $ cp userpatches/routerbox/config/postproc/99-mine.yml.sample userpatches/routerbox/config/postproc/99-mine.yml
 $ vim userpatches/routerbox/config/postproc/99-mine.yml  # edit settings for the image to be built
-$ make  # build the image into output/images/
+$ make  # build the image into output/images/. Uses docker.
 ```
 
 See `userpatches/routerbox/README.md` for more details on the image
@@ -32,9 +32,8 @@ settings.
 
 ## Description
 
-This repository is a fork of Armbian
-(https://github.com/armbian/build); Routerbox is included via Git
-subtree (https://git-scm.com/book/de/v1/Git-Tools-Subtree-Merging) at
+This repository is a fork of Armbian (https://github.com/armbian/build);
+Routerbox is included via Git subtree at
 userpatches/routerbox.
 
 Armbian is used to set up the basic image, Routerbox is then used to
