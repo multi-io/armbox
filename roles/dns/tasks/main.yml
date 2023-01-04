@@ -1,3 +1,11 @@
+- name: disable systemd-resolved
+  systemd:
+    name: "{{item}}"
+    enabled: False
+    state: stopped
+  with_items:
+    - systemd-resolved
+
 - name: install dnsmasq package
   package:
     name: "{{item}}"
