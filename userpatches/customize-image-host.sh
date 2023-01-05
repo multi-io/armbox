@@ -11,7 +11,7 @@ ln -fs /usr/bin/python3 /usr/bin/python
 
 ans_dir=/root/ansible
 if [ ! -d "$ans_dir" ]; then
-    git clone --depth 1 --branch armbox https://github.com/multi-io/ansible.git "$ans_dir"
+    git clone --depth 1 --branch myintegration https://github.com/multi-io/ansible.git "$ans_dir"
     pip install -r "$ans_dir/requirements.txt"
 fi
 source "$ans_dir/hacking/env-setup"
