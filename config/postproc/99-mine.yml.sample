@@ -6,6 +6,32 @@ authorized_keys:
   - 'ssh-rsa xxxxxxxxx olaf@tackd'
   - 'ssh-rsa yyyyyyyyy oklischat@Olafs-MacBook-Air.local'
 
+# SSH host keys
+sshd_host_private_keys:
+  ecdsa: |
+    -----BEGIN OPENSSH PRIVATE KEY-----
+    b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAaAAAABNlY2RzYS
+    1zaGEyLW5pc3RwMjU2AAAACG5pc3RwMjU2AAAAQQRjnuPST5KRDN0XT7AwHiR0eyE0N6Gi
+    .....
+    .....
+    -----END OPENSSH PRIVATE KEY-----
+  ed25519: |
+    -----BEGIN OPENSSH PRIVATE KEY-----
+    b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAAAMwAAAAtzc2gtZW
+    QyNTUxOQAAACAP/2bLdjMWzy1xZ2BzJ4S59FvT1xjLwvFH88LH7p3LdgAAAJhRFFllURRZ
+    .....
+    .....
+    -----END OPENSSH PRIVATE KEY-----
+  rsa: |
+    -----BEGIN OPENSSH PRIVATE KEY-----
+    b3BlbnNzaC1rZXktdjEAAAAABG5vbmUAAAAEbm9uZQAAAAAAAAABAAABlwAAAAdzc2gtcn
+    NhAAAAAwEAAQAAAYEAvBfiiBNc8WkYk7RtH0m83CvFLZ+9Mfe1bnJLqH1NBgyzvDIYMeAi
+    fl/RCUi2UlWNZeenqzxnkWUsxPP+32UqgpnFd1PmbqjANTvgxFrqDeSUPDQxDzyzoWsYKR
+    jnflxN7mmBYqfdO1i+iOUMjZv6BVjYWIuDYEJ4/a9BNrJOlExsiDnKTs8+eBN+zmGHVec2
+    .....
+    .....
+    -----END OPENSSH PRIVATE KEY-----
+
 # /24 network in which to assign the LAN IPs.
 # must be a /24
 lan_prefix: 192.168.143
