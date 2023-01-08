@@ -1,3 +1,2 @@
 sshd_options:
-  - ['PermitRootLogin', 'no']
   - ['PasswordAuthentication', 'no']
