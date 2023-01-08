@@ -1,9 +1,7 @@
 - name: set sshd options
-  lineinfile:
-    dest: /etc/ssh/sshd_config
-    regexp: "^{{item[0]}}"
-    line: "{{item[0]}} {{item[1]}}"
-  with_items:
-    - "{{sshd_options}}"
+  template:
+    src: templates/routerbox.conf.j2
+    dest: /etc/ssh/sshd_config.d/routerbox.conf
+    mode: 0644
   notify:
     - restart sshd service
