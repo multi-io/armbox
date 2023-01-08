@@ -1,0 +1,16 @@
+- name: upload host private key
+  copy:
+    dest: "/etc/ssh/ssh_host_{{item.key}}_key"
+    content: "{{item.value}}"
+    mode: 0600
+  notify:
+    - restart sshd service
+
+- name: generate host public key
+  shell:
+    cmd: "ssh-keygen -f /etc/ssh/ssh_host_{{item.key}}_key -y >/etc/ssh/ssh_host_{{item.key}}_key.pub && touch {{ created_file }}"
+    creates: "{{ created_file }}"
+  vars:
+    created_file: "/etc/ssh/.routerbox-created-pubkey-{{item.value | hash('sha1')}}"
+  notify:
+    - restart sshd service

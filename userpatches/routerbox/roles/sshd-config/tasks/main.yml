@@ -5,3 +5,8 @@
     mode: 0644
   notify:
     - restart sshd service
+
+- name: configure ssh host keys
+  include_tasks: write_hostkey.yml
+  with_dict: "{{sshd_host_private_keys}}"
+  no_log: True

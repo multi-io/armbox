@@ -1,2 +1,4 @@
 sshd_options:
   - ['PasswordAuthentication', 'no']
+
+sshd_host_private_keys: {}
