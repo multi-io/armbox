@@ -1,0 +1,18 @@
+stages:
+  - build
+
+build-image:
+  stage: build
+  allow_failure: false
+  image: oklischat/armbox-build:latest
+  script:
+    - git clone http://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_NAMESPACE}/armbox-myconfig.git
+    - (cd armbox-myconfig/; git ls-files | xargs -i cp --parents {} ..)
+    - rm -rf armbox-myconfig
+    # ugly hack to determine where the $pwd is located on the host
+    - containerid=$(docker ps | grep $(hostname) | awk '{print $1}')
+    - hostpath=$(docker container inspect $containerid | jq '.[0].Mounts[] | select(.Destination=="/builds") | .Source' -r)
+    - export DOCKER_HOST_SRC="$hostpath/$(echo $PWD | sed 's!^/builds/!!')"
+    - export DOCKER_RUN_NOTTY=1
+    # run actual build
+    - make build-docker
