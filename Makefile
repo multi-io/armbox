@@ -20,6 +20,6 @@ routerbox-push-origin:
 	support/git-subtree-push-origin-master.sh userpatches/routerbox
 
 setup-running-machine:
-	source ./armbox.conf; \
+	source ./armbox.config; \
 	cd userpatches/routerbox; \
 	ansible-playbook $(ANSIBLE_PARAMS) -e board=$$BOARD -i inventory.running-machine setup.yml

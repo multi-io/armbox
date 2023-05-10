@@ -33,6 +33,6 @@ cache
 *.retry
 
 ### Armbox
-/armbox.conf
+/armbox.config
 99-*.yml*
 /.idea

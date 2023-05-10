@@ -19,8 +19,8 @@ Vagrant.
 
 ```
 # specify board type
-$ cp armbox.conf.sample armbox.conf
-$ vim armbox.conf  # edit BOARD= variable
+$ cp armbox.config.sample armbox.config
+$ vim armbox.config  # edit BOARD= variable
 # edit routerbox variables, which parameterize the board image setup
 $ cp userpatches/routerbox/config/postproc/99-mine.yml.sample userpatches/routerbox/config/postproc/99-mine.yml
 $ vim userpatches/routerbox/config/postproc/99-mine.yml  # edit settings for the image to be built
