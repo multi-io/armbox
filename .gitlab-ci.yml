@@ -16,3 +16,10 @@ build-image:
     - export DOCKER_RUN_NOTTY=1
     # run actual build
     - make build-docker
+  cache:
+    paths:
+      - output/debs/
+    when: always
+  artifacts:
+    paths:
+      - output/images/
