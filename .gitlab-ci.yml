@@ -7,6 +7,7 @@ build-image:
   image: oklischat/armbox-build:latest
   script:
     - git clone http://gitlab-ci-token:${CI_JOB_TOKEN}@${CI_SERVER_HOST}/${CI_PROJECT_NAMESPACE}/armbox-myconfig.git
+    - 'echo "using config repo commit: $(git -C armbox-myconfig log --format=format:%H -1)"'
     - (cd armbox-myconfig/; git ls-files | xargs -i cp --parents {} ..)
     - rm -rf armbox-myconfig
     # ugly hack to determine where the $pwd is located on the host
