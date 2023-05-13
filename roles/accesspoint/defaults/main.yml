@@ -7,7 +7,10 @@ wlan_hw_mode: g
 wlan_channel: 2
 # todo automatic channel selection (see conf)
 wlan_ieee80211n: 1
+wlan_ieee80211ac: 0
+wlan_require_ht: 0
+wlan_require_vht: 0
+wlan_vht_oper_chwidth: 1
+wlan_vht_oper_centr_freq_seg0_idx: 42
+
 wlan_wpa_passphrase: "supersecret"
-
-
-# TODO ieee80211n
