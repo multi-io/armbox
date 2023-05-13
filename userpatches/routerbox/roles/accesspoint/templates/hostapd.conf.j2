@@ -508,7 +508,7 @@ ieee80211n={{wlan_ieee80211n}}
 #ht_capab=[HT40-][SHORT-GI-20][SHORT-GI-40]
 
 # Require stations to support HT PHY (reject association if they do not)
-#require_ht=1
+require_ht={{wlan_require_ht}}
 
 # If set non-zero, require stations to perform scans of overlapping
 # channels to test for stations which would be affected by 40 MHz traffic.
@@ -523,7 +523,7 @@ ieee80211n={{wlan_ieee80211n}}
 # 0 = disabled (default)
 # 1 = enabled
 # Note: You will also need to enable WMM for full VHT functionality.
-#ieee80211ac=1
+ieee80211ac={{wlan_ieee80211ac}}
 
 # vht_capab: VHT capabilities (list of flags)
 #
@@ -645,19 +645,21 @@ ieee80211n={{wlan_ieee80211n}}
 #vht_capab=[SHORT-GI-80][HTC-VHT]
 #
 # Require stations to support VHT PHY (reject association if they do not)
-#require_vht=1
+require_vht={{wlan_require_vht}}
 
 # 0 = 20 or 40 MHz operating Channel width
 # 1 = 80 MHz channel width
 # 2 = 160 MHz channel width
 # 3 = 80+80 MHz channel width
-#vht_oper_chwidth=1
+#vht_oper_chwidth={{wlan_vht_oper_chwidth}}
+
 #
 # center freq = 5 GHz + (5 * index)
 # So index 42 gives center freq 5.210 GHz
 # which is channel 42 in 5G band
 #
-#vht_oper_centr_freq_seg0_idx=42
+vht_oper_centr_freq_seg0_idx={{wlan_vht_oper_centr_freq_seg0_idx}}
+
 #
 # center freq = 5 GHz + (5 * index)
 # So index 159 gives center freq 5.795 GHz
