@@ -4,6 +4,7 @@
     state: latest
   with_items:
     - hostapd
+    - usb-modeswitch
 
 - name: roll out hostapd config
   template:
