@@ -36,3 +36,4 @@ cache
 /armbox.config
 99-*.yml*
 /.idea
+/.vscode
