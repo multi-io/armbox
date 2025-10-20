@@ -14,6 +14,13 @@
     - resolvconf
     - dnsmasq
 
+- name: configure autorestart and other things
+  copy:
+    src: files/dnsmasq.service.d/
+    dest: /etc/systemd/system/dnsmasq.service.d/
+    mode: 0644
+  notify: reload systemd
+
 - name: roll out dnsmasq config
   template:
     src: templates/dnsmasq.conf.j2
