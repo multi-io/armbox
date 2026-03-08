@@ -22,4 +22,4 @@ routerbox-push-origin:
 setup-running-machine:
 	source ./armbox.config; \
 	cd userpatches/routerbox; \
-	ansible-playbook $(ANSIBLE_PARAMS) -e board=$$BOARD -i inventory.running-machine setup.yml
+	uv run ansible-playbook $(ANSIBLE_PARAMS) -e board=$$BOARD -i inventory.running-machine setup.yml
