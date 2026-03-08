@@ -1,0 +1,9 @@
+[project]
+name = "routerbox"
+version = "0.1.0"
+description = "Ansible playbooks for configuring home router. The Python env facilitates running Ansible in a standardized, repeatable fashion"
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    "ansible>=13.4.0",
+]
